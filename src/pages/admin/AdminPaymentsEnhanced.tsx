@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import BrandLogo from "@/components/BrandLogo";
+import logo from "@/assets/logo.png";
 import { useSearchParams } from "react-router-dom";
 import {
   CreditCard,
@@ -280,16 +280,23 @@ export default function AdminPaymentsEnhanced() {
             {selectedPayment && (
               <div id={`invoice-${selectedPayment.id}`} className="bg-white p-12 relative print:p-8">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-[100px] -z-10" />
-                  <div className="flex justify-between items-start mb-16 print:mb-12 border-b border-slate-100 pb-12">
+                  <div className="flex justify-between items-start mb-12 print:mb-8 border-b border-slate-100 pb-10">
                     <div className="flex flex-col">
-                      <BrandLogo mode="full" className="h-10 mb-6" />
+                      <img src={logo} alt="Noamskin Logo" className="h-10 mb-6 w-auto object-contain object-left" />
                       <div className="space-y-1 text-sm text-slate-500">
                         <p className="font-bold">Noamskin Platform HQ</p>
                         <p>Kuala Lumpur, Malaysia</p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-right">
+                      <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2">Invoice</h2>
+                      <p className="font-bold text-slate-500 uppercase tracking-widest text-[10px]">#{selectedPayment.id?.substring(0, 8)}</p>
+                      <p className="text-sm font-bold text-slate-400 mt-4">{format(new Date(selectedPayment.created_at || new Date()), "MMM dd, yyyy")}</p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8 mb-10">
                     <div>
                       <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-2">From</p>
                       <p className="text-lg font-black text-slate-900 mb-1">Noamskin</p>
