@@ -50,7 +50,10 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
                 throw new Error('Access denied. Please ensure you are logged in with the correct permissions.');
             }
 
-            throw new Error(errorData.message || errorData.error || `Server returned ${response.status}`);
+            const errorMessage = errorData.detail 
+                ? `${errorData.error || 'Error'}: ${errorData.detail}`
+                : (errorData.message || errorData.error || `Server returned ${response.status}`);
+            throw new Error(errorMessage);
         }
 
         const json = await response.json();

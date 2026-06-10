@@ -100,9 +100,10 @@ export default function BookingTreatmentPage() {
             });
             // Optional: navigate back or stay
         } catch (error: any) {
+            console.error("Save Treatment Error:", error);
             toast({
                 title: "Error",
-                description: "Failed to save record.",
+                description: error.detail || error.message || "Failed to save record.",
                 variant: 'destructive',
             });
         } finally {
