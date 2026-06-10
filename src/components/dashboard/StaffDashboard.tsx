@@ -547,7 +547,7 @@ export function StaffDashboard() {
                                 value={treatmentData.treatment_details}
                                 onChange={e => setTreatmentData({ ...treatmentData, treatment_details: e.target.value })}
                                 placeholder="What was done?"
-                                className="bg-slate-50 border-none rounded-xl text-xs font-bold"
+                                className="bg-slate-50 border-none rounded-xl text-slate-900 text-xs font-bold"
                             />
                         </div>
                         <div className="space-y-2">
@@ -556,7 +556,7 @@ export function StaffDashboard() {
                                 value={treatmentData.products_used}
                                 onChange={e => setTreatmentData({ ...treatmentData, products_used: e.target.value })}
                                 placeholder="Chemicals/Tools deployed..."
-                                className="bg-slate-50 border-none rounded-xl text-xs font-bold"
+                                className="bg-slate-50 border-none rounded-xl text-slate-900 text-xs font-bold"
                             />
                         </div>
                         <div className="space-y-2">
@@ -565,7 +565,7 @@ export function StaffDashboard() {
                                 value={treatmentData.skin_reaction}
                                 onChange={e => setTreatmentData({ ...treatmentData, skin_reaction: e.target.value })}
                                 placeholder="Normal / Sensitive / Reaction..."
-                                className="h-12 bg-slate-50 border-none rounded-xl text-xs font-bold"
+                                className="h-12 bg-slate-50 border-none rounded-xl text-slate-900 text-xs font-bold"
                             />
                         </div>
                     </div>
