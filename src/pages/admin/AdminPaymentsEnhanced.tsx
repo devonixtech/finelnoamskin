@@ -278,6 +278,7 @@ export default function AdminPaymentsEnhanced() {
         <Dialog open={!!selectedPayment} onOpenChange={(open) => !open && setSelectedPayment(null)}>
           <DialogContent className="max-w-4xl p-0 overflow-hidden rounded-[2rem] border-none shadow-2xl bg-white">
             {selectedPayment && (
+              <>
               <div id={`invoice-${selectedPayment.id}`} className="bg-white p-12 relative print:p-8">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-[100px] -z-10" />
                   <div className="flex justify-between items-start mb-12 print:mb-8 border-b border-slate-100 pb-10">
@@ -351,7 +352,7 @@ export default function AdminPaymentsEnhanced() {
                     <Smartphone className="w-4 h-4 mr-2" /> WhatsApp Salon
                   </Button>
                 </div>
-              </div>
+              </>
             )}
           </DialogContent>
         </Dialog>
