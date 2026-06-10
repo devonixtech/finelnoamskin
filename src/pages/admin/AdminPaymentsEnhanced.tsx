@@ -274,7 +274,18 @@ export default function AdminPaymentsEnhanced() {
           </CardContent>
         </Card>
 
-        {/* Invoice Detail Dialog (Same design as BillingPage for consistency) */}
+        {/* Invoice Detail Dialog */}
+        <Dialog open={!!selectedPayment} onOpenChange={(open) => !open && setSelectedPayment(null)}>
+          <DialogContent className="max-w-4xl p-0 overflow-hidden rounded-[2rem] border-none shadow-2xl bg-white">
+            {selectedPayment && (
+              <div id={`invoice-${selectedPayment.id}`} className="bg-white p-12 relative print:p-8">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-[100px] -z-10" />
+                  <div className="flex justify-between items-start mb-16 print:mb-12 border-b border-slate-100 pb-12">
+                    <div className="flex flex-col">
+                      <BrandLogo mode="full" className="h-10 mb-6" />
+                      <div className="space-y-1 text-sm text-slate-500">
+                        <p className="font-bold">Noamskin Platform HQ</p>
+                        <p>Kuala Lumpur, Malaysia</p>
                     </div>
                   </div>
 
