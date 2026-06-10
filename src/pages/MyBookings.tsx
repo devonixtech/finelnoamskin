@@ -199,7 +199,7 @@ const MyBookings = () => {
               </button>
             </div>
 
-            <Link to="/salons">
+            <Link to="/services-simple">
               <Button className="bg-accent text-white font-black rounded-2xl h-14 px-8 shadow-xl shadow-accent/20">
                 <Plus className="w-5 h-5 mr-3" /> Book Experience
               </Button>

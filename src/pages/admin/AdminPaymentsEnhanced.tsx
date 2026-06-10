@@ -106,11 +106,11 @@ export default function AdminPaymentsEnhanced() {
         currency: 'MYR',
         status: p.status,
         payment_method: p.payment_method || 'System',
-        salon_name: p.salon_name || 'Unknown Salon',
-        customer_name: p.salon_name || 'System Generated', // It's a B2B payment
-        salon_email: '', // Not in default payload, can be added to query if needed
-        salon_address: '',
-        salon_phone: '',
+        salon_name: p.salon_name || p.salon?.name || 'Unknown Salon',
+        customer_name: p.salon_name || p.salon?.name || 'System Generated',
+        salon_email: p.salon_email || p.salon?.email || '',
+        salon_address: p.salon_address || p.salon?.address || '',
+        salon_phone: p.salon_phone || p.salon?.phone || '',
         booking_id: '',
         created_at: p.created_at,
         processed_at: p.paid_at || p.created_at,

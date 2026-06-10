@@ -198,7 +198,7 @@ export default function ClinicalProfile() {
                                 You need to book an appointment with a salon before you can manage your clinical profile with them.
                                 <div className="mt-4">
                                     <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
-                                        <a href="/salons">Find a Salon</a>
+                                        <a href="/services-simple">Find Services</a>
                                     </Button>
                                 </div>
                             </AlertDescription>

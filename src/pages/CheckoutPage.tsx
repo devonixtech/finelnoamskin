@@ -69,6 +69,11 @@ const CheckoutPage = () => {
     const finalTotal = cartTotal + shippingCost + taxAmount;
 
     const handleProceedToPayment = async () => {
+        if (!user) {
+            setShowLoginModal(true);
+            return;
+        }
+
         // Basic Validation
         if (!formData.email || !formData.firstName || !formData.lastName || (deliveryMethod === 'ship' && !formData.address)) {
             toast({
@@ -201,9 +206,9 @@ const CheckoutPage = () => {
                                     Create Account
                                 </Link>
                             </Button>
-                            <button onClick={() => setShowLoginModal(false)} className="w-full text-sm text-slate-400 hover:text-slate-600 font-medium py-2 transition-colors">
-                                Continue as Guest
-                            </button>
+                            <p className="text-center text-sm text-slate-400">
+                                Guest checkout is disabled.
+                            </p>
                         </div>
                     </div>
                 </div>

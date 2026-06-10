@@ -124,6 +124,14 @@ export default function AdminSalons() {
 
   const handleCreateSalon = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newSalon.city.trim() || !newSalon.state.trim()) {
+      toast({
+        title: "Missing Location",
+        description: "City and State are required before creating a salon.",
+        variant: "destructive"
+      });
+      return;
+    }
     setActionLoading(true);
     try {
       await api.admin.createSalon(newSalon);
@@ -464,11 +472,11 @@ export default function AdminSalons() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>City</Label>
-                <Input value={newSalon.city} onChange={e => setNewSalon({ ...newSalon, city: e.target.value })} className="rounded-xl h-12" placeholder="e.g. New York" />
+                <Input required value={newSalon.city} onChange={e => setNewSalon({ ...newSalon, city: e.target.value })} className="rounded-xl h-12" placeholder="e.g. New York" />
               </div>
               <div className="space-y-2">
                 <Label>State</Label>
-                <Input value={newSalon.state} onChange={e => setNewSalon({ ...newSalon, state: e.target.value })} className="rounded-xl h-12" placeholder="e.g. NY" />
+                <Input required value={newSalon.state} onChange={e => setNewSalon({ ...newSalon, state: e.target.value })} className="rounded-xl h-12" placeholder="e.g. NY" />
               </div>
             </div>
             <div className="space-y-2">

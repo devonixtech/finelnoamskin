@@ -263,7 +263,7 @@ export default function ClientHub() {
                                                 <h3 className="font-black text-slate-900">No upcoming sessions</h3>
                                                 <p className="text-slate-400 text-sm font-medium mt-1">Book a session to start your journey.</p>
                                                 <Button asChild className="mt-6 bg-slate-900 hover:bg-black text-white rounded-xl font-black px-8 h-12 shadow-xl shadow-slate-900/10">
-                                                    <Link to="/salons">Discover Salons</Link>
+                                                    <Link to="/services-simple">Discover Services</Link>
                                                 </Button>
                                             </div>
                                         )}
@@ -274,7 +274,7 @@ export default function ClientHub() {
                             {/* Quick Action Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {[
-                                    { title: "Find Salons", desc: "Explore elite grooming spots", icon: Search, link: "/salons", color: "bg-accent text-white" },
+                                    { title: "Find Services", desc: "Explore elite grooming rituals", icon: Search, link: "/services-simple", color: "bg-accent text-white" },
                                     { title: "Your Sessions", desc: "View detailed treatment records", icon: History, link: "/user/sessions", color: "bg-indigo-600 text-white" }
                                 ].map((action, i) => (
                                     <motion.div

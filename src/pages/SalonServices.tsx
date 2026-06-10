@@ -103,8 +103,8 @@ export default function SalonServices() {
                 <Scissors className="w-16 h-16 text-muted-foreground mb-6" />
                 <h2 className="text-2xl font-black text-foreground mb-2">Registry Entry Not Found</h2>
                 <p className="text-muted-foreground mb-8 text-center max-w-md">{error || "The salon you are looking for does not exist in our active database."}</p>
-                <Button onClick={() => navigate("/salons")} className="bg-foreground text-background hover:bg-accent hover:text-white font-black px-8 rounded-2xl">
-                    Return to Registry
+                <Button onClick={() => navigate("/services-simple")} className="bg-foreground text-background hover:bg-accent hover:text-white font-black px-8 rounded-2xl">
+                    Return to Services
                 </Button>
             </div>
         );

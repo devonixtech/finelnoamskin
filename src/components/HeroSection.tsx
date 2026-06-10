@@ -10,7 +10,7 @@ const HeroSection = () => {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      navigate(`/salons?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/services-simple?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -51,7 +51,7 @@ const HeroSection = () => {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
 
-              <Link to="/salons">
+              <Link to="/services-simple">
                 <Button size="lg" variant="outline" className="rounded-full px-8 gap-2 border-2 border-foreground/20 text-foreground hover:bg-foreground/5">
                   <CalendarCheck className="w-5 h-5" />
                   Book Appointment

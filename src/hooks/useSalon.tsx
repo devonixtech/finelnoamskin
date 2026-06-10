@@ -111,6 +111,7 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     try {
       const rolesData = await api.userRoles.getByUser(user.id);
       const userSalonRole = (user as any).salon_role;
+      const userType = (user as any).user_type;
 
       // Staff users: fetch salon by ID from their role, skip getMySalons
       if (userSalonRole === 'staff' && rolesData.length > 0) {
@@ -129,6 +130,20 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
           setCurrentSalon(null);
           setUserRole(null);
         }
+        setSubscription(null);
+        setLoading(false);
+        return;
+      }
+
+      // Customers and non-salon users should not hit owner-only salon endpoints.
+      if (
+        userType === 'customer' &&
+        userSalonRole !== 'owner' &&
+        userSalonRole !== 'manager'
+      ) {
+        setSalons([]);
+        setCurrentSalon(null);
+        setUserRole(null);
         setSubscription(null);
         setLoading(false);
         return;
@@ -167,8 +182,18 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
           setSubscription(null);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching salons:', error);
+
+      // Customers and users without salon access should fail quietly here.
+      if ((user as any)?.user_type === 'customer') {
+        setSalons([]);
+        setCurrentSalon(null);
+        setUserRole(null);
+        setSubscription(null);
+        return;
+      }
+
       toast({
         title: "Error",
         description: "Failed to load salon data",

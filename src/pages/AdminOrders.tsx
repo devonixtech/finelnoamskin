@@ -211,7 +211,7 @@ const AdminOrdersPage = () => {
                                     <div className="space-y-1">
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Recipient</p>
                                         <p className="font-semibold text-slate-900 text-lg">
-                                            {selectedOrder.shipping_address.firstName} {selectedOrder.shipping_address.lastName}
+                                            {selectedOrder.customer_name}
                                         </p>
                                         <p className="text-slate-500 text-sm">{selectedOrder.customer_email}</p>
                                     </div>
@@ -240,7 +240,7 @@ const AdminOrdersPage = () => {
                                             {selectedOrder.shipping_address.apartment && <>, {selectedOrder.shipping_address.apartment}</>}
                                         </p>
                                         <p className="text-slate-600">
-                                            {selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.zip}
+                                            {selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.postalCode || selectedOrder.shipping_address.zip}
                                         </p>
                                         {selectedOrder.shipping_address.country && (
                                             <div className="flex items-center gap-1.5 mt-1 text-slate-500 text-sm">

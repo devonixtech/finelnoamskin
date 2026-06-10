@@ -22,7 +22,7 @@ interface ContactEnquiry {
     phone: string | null;
     subject: string;
     message: string;
-    status: 'pending' | 'replied' | 'closed';
+    status: 'new' | 'read' | 'resolved';
     created_at: string;
     updated_at: string;
 }
@@ -50,7 +50,7 @@ export default function AdminContactEnquiries() {
         }
     };
 
-    const updateStatus = async (id: string, status: 'replied' | 'closed') => {
+    const updateStatus = async (id: string, status: 'read' | 'resolved') => {
         try {
             await api.admin.updateContactEnquiryStatus(id, status);
             toast({
@@ -92,9 +92,9 @@ export default function AdminContactEnquiries() {
 
     const stats = {
         total: enquiries.length,
-        pending: enquiries.filter(e => e.status === 'pending').length,
-        replied: enquiries.filter(e => e.status === 'replied').length,
-        closed: enquiries.filter(e => e.status === 'closed').length,
+        newCount: enquiries.filter(e => e.status === 'new').length,
+        read: enquiries.filter(e => e.status === 'read').length,
+        resolved: enquiries.filter(e => e.status === 'resolved').length,
     };
 
     if (loading) {
@@ -135,9 +135,9 @@ export default function AdminContactEnquiries() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {[
                         { label: "Total Enquiries", value: stats.total, icon: MessageSquare, color: "text-blue-500", bg: "bg-blue-50" },
-                        { label: "Pending", value: stats.pending, icon: Clock, color: "text-orange-500", bg: "bg-orange-50" },
-                        { label: "Replied", value: stats.replied, icon: CheckCircle, color: "text-green-500", bg: "bg-green-50" },
-                        { label: "Closed", value: stats.closed, icon: XCircle, color: "text-slate-500", bg: "bg-slate-50" },
+                        { label: "New", value: stats.newCount, icon: Clock, color: "text-orange-500", bg: "bg-orange-50" },
+                        { label: "Read", value: stats.read, icon: CheckCircle, color: "text-green-500", bg: "bg-green-50" },
+                        { label: "Resolved", value: stats.resolved, icon: XCircle, color: "text-slate-500", bg: "bg-slate-50" },
                     ].map((stat, i) => (
                         <Card key={i} className="border-none shadow-sm bg-white rounded-3xl">
                             <CardContent className="p-6">
@@ -209,9 +209,9 @@ export default function AdminContactEnquiries() {
 
                                             <div className="flex flex-col items-end gap-3">
                                                 <Badge
-                                                    className={`font-bold ${enquiry.status === 'pending'
+                                                    className={`font-bold ${enquiry.status === 'new'
                                                         ? 'bg-orange-100 text-orange-700 border-orange-200'
-                                                        : enquiry.status === 'replied'
+                                                        : enquiry.status === 'read'
                                                             ? 'bg-green-100 text-green-700 border-green-200'
                                                             : 'bg-slate-100 text-slate-700 border-slate-200'
                                                         }`}
@@ -220,24 +220,24 @@ export default function AdminContactEnquiries() {
                                                 </Badge>
 
                                                 <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                                                    {enquiry.status === 'pending' && (
+                                                    {enquiry.status === 'new' && (
                                                         <Button
                                                             size="sm"
-                                                            onClick={() => updateStatus(enquiry.id, 'replied')}
+                                                            onClick={() => updateStatus(enquiry.id, 'read')}
                                                             className="bg-green-500 hover:bg-green-600 text-white rounded-lg"
                                                         >
                                                             <CheckCircle className="w-4 h-4 mr-1" />
-                                                            Mark Replied
+                                                            Mark Read
                                                         </Button>
                                                     )}
-                                                    {enquiry.status !== 'closed' && (
+                                                    {enquiry.status !== 'resolved' && (
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() => updateStatus(enquiry.id, 'closed')}
+                                                            onClick={() => updateStatus(enquiry.id, 'resolved')}
                                                             className="rounded-lg"
                                                         >
-                                                            Close
+                                                            Mark Resolved
                                                         </Button>
                                                     )}
                                                     <Button
@@ -277,9 +277,9 @@ export default function AdminContactEnquiries() {
                                 <div>
                                     <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Status</p>
                                     <Badge
-                                        className={`font-bold ${selectedEnquiry.status === 'pending'
+                                        className={`font-bold ${selectedEnquiry.status === 'new'
                                             ? 'bg-orange-100 text-orange-700'
-                                            : selectedEnquiry.status === 'replied'
+                                            : selectedEnquiry.status === 'read'
                                                 ? 'bg-green-100 text-green-700'
                                                 : 'bg-slate-100 text-slate-700'
                                             }`}
@@ -330,16 +330,16 @@ export default function AdminContactEnquiries() {
                                     <Mail className="w-4 h-4 mr-2" />
                                     Reply via Email
                                 </Button>
-                                {selectedEnquiry.status === 'pending' && (
+                                {selectedEnquiry.status === 'new' && (
                                     <Button
                                         onClick={() => {
-                                            updateStatus(selectedEnquiry.id, 'replied');
+                                            updateStatus(selectedEnquiry.id, 'read');
                                             setSelectedEnquiry(null);
                                         }}
                                         className="flex-1 bg-green-500 hover:bg-green-600 text-white rounded-xl h-12 font-bold"
                                     >
                                         <CheckCircle className="w-4 h-4 mr-2" />
-                                        Mark as Replied
+                                        Mark as Read
                                     </Button>
                                 )}
                             </div>

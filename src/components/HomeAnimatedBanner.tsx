@@ -113,10 +113,10 @@ const HomeAnimatedBanner = () => {
                             {/* Clean CTAs */}
                             <div className="flex flex-wrap gap-4 pt-4">
                                 <Button
-                                    onClick={() => navigate('/salons')}
+                                    onClick={() => navigate('/services-simple')}
                                     className="h-16 px-10 bg-accent hover:bg-accent/90 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-accent/20 transition-all hover:-translate-y-1 active:scale-95"
                                 >
-                                    Explore Salons
+                                    Explore Services
                                     <ArrowRight className="w-4 h-4 ml-3" />
                                 </Button>
                             </div>

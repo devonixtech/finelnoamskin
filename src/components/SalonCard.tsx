@@ -23,7 +23,7 @@ const SalonCard = ({
 
   return (
     <div
-      onClick={() => navigate(`/salons/${id}`)}
+      onClick={() => navigate("/services-simple")}
       className="group cursor-pointer space-y-5"
     >
       {/* Cover Image with Badge */}

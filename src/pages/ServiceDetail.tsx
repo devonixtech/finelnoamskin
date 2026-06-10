@@ -128,8 +128,8 @@ export default function ServiceDetail() {
                     <Info className="w-10 h-10 text-slate-200" />
                 </div>
                 <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Ritual Not Found</h2>
-                <Button onClick={() => navigate("/salons")} className="bg-slate-900 text-white font-black px-12 h-14 rounded-2xl">
-                    Return to Registry
+                <Button onClick={() => navigate("/services-simple")} className="bg-slate-900 text-white font-black px-12 h-14 rounded-2xl">
+                    Return to Services
                 </Button>
             </div>
         );

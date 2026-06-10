@@ -76,7 +76,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <FooterLink to="/" label="Home" />
               <FooterLink to="/about" label="About Us" />
-              <FooterLink to="/salons" label="Our Services" />
+              <FooterLink to="/services-simple" label="Our Services" />
               <FooterLink to="/book" label="Book Appointment" />
               <FooterLink to="/contact" label="Contact Us" />
               {/* <FooterLink to="/admin-access" label="Admin Login" /> */}

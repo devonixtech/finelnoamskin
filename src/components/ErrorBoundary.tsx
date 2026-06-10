@@ -24,11 +24,36 @@ export class ErrorBoundary extends Component<Props, State> {
 
     public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
         console.error("Uncaught error:", error, errorInfo);
+        
+        // Auto-reload on chunk load error
+        if (
+            error.message.includes("Failed to fetch dynamically imported module") || 
+            error.message.includes("Importing a module script failed") ||
+            error.name === "ChunkLoadError"
+        ) {
+            const lastReloadStr = sessionStorage.getItem("chunk-load-error-reloaded");
+            const lastReload = lastReloadStr ? parseInt(lastReloadStr, 10) : 0;
+            
+            // If the last reload was more than 10 seconds ago, we can reload again
+            if (Date.now() - lastReload > 10000) {
+                sessionStorage.setItem("chunk-load-error-reloaded", Date.now().toString());
+                window.location.reload();
+                return;
+            }
+        }
+
         this.setState({ error, errorInfo });
     }
 
     public render() {
         if (this.state.hasError) {
+            // Check if we are currently reloading to hide the flash of the fallback UI
+            const lastReloadStr = sessionStorage.getItem("chunk-load-error-reloaded");
+            const lastReload = lastReloadStr ? parseInt(lastReloadStr, 10) : 0;
+            if (Date.now() - lastReload < 1000) {
+                return null;
+            }
+
             return (
                 <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
                     <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 space-y-4 border border-gray-200">

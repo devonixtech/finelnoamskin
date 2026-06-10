@@ -65,7 +65,18 @@ import { format, isValid, parseISO } from "date-fns";
 
 const safeFormat = (dateInput: string | Date | null | undefined, fmt: string) => {
     if (!dateInput) return "N/A";
-    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+    let date;
+    if (typeof dateInput === 'string') {
+        const datePart = dateInput.split('T')[0].split(' ')[0];
+        const parts = datePart.split('-');
+        if (parts.length === 3) {
+            date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        } else {
+            date = new Date(dateInput);
+        }
+    } else {
+        date = dateInput;
+    }
     if (!isValid(date)) return "N/A";
     return format(date, fmt);
 };
@@ -170,10 +181,34 @@ export default function CustomerDetailsPage() {
             // If profile is thin but bookings have data, enrich it
             const enrichedProfile = { ...profileData };
             if (bookingsData && bookingsData.length > 0) {
-                const latestBooking = bookingsData[0];
-                if (!enrichedProfile.full_name) enrichedProfile.full_name = latestBooking.full_name;
-                if (!enrichedProfile.phone) enrichedProfile.phone = latestBooking.phone;
-                if (!enrichedProfile.email) enrichedProfile.email = latestBooking.email;
+                let extractedName = "";
+                let extractedPhone = "";
+                let extractedEmail = "";
+
+                for (const b of bookingsData) {
+                    if (!extractedName) {
+                        extractedName = b.full_name || b.user_name;
+                        if (!extractedName && b.notes) {
+                            const walkInMatch = b.notes.match(/(?:Walk-in|Manual Customer):\s*([^|,#\n]+)/);
+                            if (walkInMatch && walkInMatch[1].trim() && walkInMatch[1].trim() !== "undefined") {
+                                extractedName = walkInMatch[1].trim();
+                            }
+                        }
+                    }
+                    if (!extractedPhone) extractedPhone = b.phone || b.user_phone;
+                    if (!extractedEmail) extractedEmail = b.email;
+                }
+
+                if (!enrichedProfile.full_name && extractedName) {
+                    enrichedProfile.full_name = extractedName;
+                }
+                
+                if (!enrichedProfile.full_name) {
+                    enrichedProfile.full_name = extractedEmail ? extractedEmail.split('@')[0] : `Client #${userId.substring(0, 4)}`;
+                }
+
+                if (!enrichedProfile.phone) enrichedProfile.phone = extractedPhone;
+                if (!enrichedProfile.email) enrichedProfile.email = extractedEmail;
             }
 
             // Fetch CRM extended data
@@ -517,11 +552,13 @@ export default function CustomerDetailsPage() {
     }
 
     // Derived Data for UI
-    const totalSpend = bookings.reduce((sum, b: any) => sum + (Number(b.price_paid || b.price) || 0), 0);
-    const completedBookings = bookings.filter((b: any) => b.status === 'completed');
-    const totalVisits = completedBookings.length;
-    const uniqueServices = Array.from(new Set(bookings.map(b => b.service_name).filter(Boolean)));
-    const lastVisit = bookings.length > 0 ? bookings[0].booking_date : "N/A";
+    const totalSpend = bookings.filter((b: any) => b.status !== 'cancelled').reduce((sum, b: any) => sum + (Number(b.price_paid || b.price) || 0), 0);
+    const validBookings = bookings.filter((b: any) => b.status !== 'cancelled');
+    const pastBookings = validBookings.filter((b: any) => new Date(b.booking_date) <= new Date());
+    pastBookings.sort((a: any, b: any) => new Date(b.booking_date).getTime() - new Date(a.booking_date).getTime());
+    const totalVisits = validBookings.length;
+    const uniqueServices = Array.from(new Set(bookings.map((b: any) => b.service_name).filter(Boolean)));
+    const lastVisit = pastBookings.length > 0 ? pastBookings[0].booking_date : "N/A";
 
     return (
         <ResponsiveDashboardLayout>
@@ -599,7 +636,7 @@ export default function CustomerDetailsPage() {
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <Calendar className="w-4 h-4 text-[#55402f]" />
-                                                    <span className="font-semibold text-foreground">DOB: {dob ? safeFormat(dob, 'MM/dd/yyyy') : 'Not Set'} {dob && isValid(new Date(dob)) && `(Age: ${new Date().getFullYear() - new Date(dob).getFullYear()})`}</span>
+                                                    <span className="font-semibold text-foreground">DOB: {dob ? safeFormat(dob, 'MMM d, yyyy') : 'Not Set'} {dob && isValid(new Date(dob)) && `(Age: ${new Date().getFullYear() - new Date(dob).getFullYear()})`}</span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <ShieldCheck className="w-4 h-4 text-[#55402f]" />
@@ -612,7 +649,7 @@ export default function CustomerDetailsPage() {
                                     <div className="mt-6 pt-6 border-t border-border grid grid-cols-3 gap-4 text-center">
                                         <div>
                                             <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Last Visit</p>
-                                            <p className="text-lg font-black text-foreground mt-1">{lastVisit !== "N/A" ? safeFormat(lastVisit, 'MM/dd/yyyy') : "N/A"}</p>
+                                            <p className="text-lg font-black text-foreground mt-1">{lastVisit !== "N/A" ? safeFormat(lastVisit, 'MMM d, yyyy') : "N/A"}</p>
                                         </div>
                                         <div className="border-l border-border">
                                             <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Total Visits</p>
@@ -647,7 +684,7 @@ export default function CustomerDetailsPage() {
                                                     <tbody className="divide-y divide-border">
                                                         {bookings.map((b) => (
                                                             <tr key={b.id} className="hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => handleOpenTreatmentRecord(b)}>
-                                                                <td className="py-3 px-4 font-black text-muted-foreground">{safeFormat(b.booking_date, 'MM/dd/yyyy')}</td>
+                                                                <td className="py-3 px-4 font-black text-muted-foreground">{safeFormat(b.booking_date, 'MMM d, yyyy')}</td>
                                                                 <td className="py-3 px-4 text-foreground font-black truncate max-w-[120px]">{b.service_name || "Service"}</td>
                                                                 <td className="py-3 px-4 text-right font-black text-foreground">MYR {b.price}</td>
                                                             </tr>

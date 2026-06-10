@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import logo from "@/assets/logo.png";
 
 export default function SiteLoader() {
@@ -6,9 +6,8 @@ export default function SiteLoader() {
         <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-white flex items-center justify-center overflow-hidden"
+            className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-white"
         >
-            {/* Background Pulsing Circles */}
             <div className="absolute inset-0 flex items-center justify-center">
                 {[1, 2, 3].map((i) => (
                     <motion.div
@@ -24,57 +23,27 @@ export default function SiteLoader() {
                             delay: i * 0.8,
                             ease: "easeOut"
                         }}
-                        className="absolute w-[300px] h-[300px] border border-slate-100 rounded-full"
+                        className="absolute h-[300px] w-[300px] rounded-full border border-slate-100"
                     />
                 ))}
             </div>
 
             <div className="relative flex flex-col items-center">
-                {/* Logo Icon Container */}
                 <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative mb-8"
-                >
-                    {/* Main Icon Background */}
-                    <div className="w-24 h-24 bg-[#1A1A1A] rounded-[2rem] flex items-center justify-center shadow-2xl shadow-indigo-500/10 relative z-10">
-                        <motion.div
-                            animate={{
-                                rotate: [0, 5, -5, 0],
-                                scale: [1, 1.05, 0.95, 1]
-                            }}
-                            transition={{
-                                duration: 4,
-                                repeat: Infinity,
-                                ease: "easeInOut"
-                            }}
-                        >
-                        <motion.img
-                            src={logo}
-                            alt="Noamskin"
-                            className="w-12 h-12 object-contain"
-                        />
-                        </motion.div>
-                    </div>
-
-                    {/* Glow Effect */}
-                    <div className="absolute inset-0 bg-[#1A1A1A] blur-2xl opacity-20 -z-10 rounded-[2rem]" />
-                </motion.div>
-
-                {/* Branding Text */}
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.4, duration: 0.8 }}
+                    initial={{ scale: 0.96, y: 12, opacity: 0 }}
+                    animate={{ scale: 1, y: 0, opacity: 1 }}
+                    transition={{ delay: 0.15, duration: 0.8 }}
                     className="text-center"
                 >
-                    {/* <h1 className="text-3xl font-black text-[#1A1A1A] tracking-tighter mb-4">
-                        StyleSync
-                    </h1> */}
+                    <motion.img
+                        src={logo}
+                        alt="Noamskin Logo"
+                        animate={{ opacity: [0.92, 1, 0.92] }}
+                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                        className="mb-5 h-28 w-auto md:h-32"
+                    />
 
-                    {/* Syncing Indicator Bars */}
-                    <div className="flex items-center justify-center gap-1.5 h-6">
+                    <div className="flex h-6 items-center justify-center gap-1.5">
                         {[0, 1, 2].map((i) => (
                             <motion.div
                                 key={i}
@@ -88,21 +57,20 @@ export default function SiteLoader() {
                                     delay: i * 0.15,
                                     ease: "easeInOut"
                                 }}
-                                className="w-1.5 bg-[#4A6670] rounded-full"
+                                className="w-1.5 rounded-full bg-[#4A6670]"
                             />
                         ))}
                     </div>
                 </motion.div>
             </div>
 
-            {/* Footer Quote (Optional subtle addition for premium feel) */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.4 }}
                 transition={{ delay: 1, duration: 1 }}
                 className="absolute bottom-12 text-[10px] font-black uppercase tracking-[0.4em] text-slate-400"
             >
-                Initializing Global Registry
+                Preparing The Noamskin Experience
             </motion.div>
         </motion.div>
     );

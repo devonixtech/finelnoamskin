@@ -106,7 +106,7 @@ const Navbar = () => {
 
                     {/* Logo Section */}
                     <Link to="/" className="flex items-center gap-2">
-                        <img src={logo} alt="Salon Logo" className="h-10 md:h-16 w-auto" />
+                        <img src={logo} alt="Noamskin Logo" className="h-10 md:h-16 w-auto" />
                     </Link>
 
                     {/* Desktop Navigation Links - Center */}
@@ -536,7 +536,7 @@ const Navbar = () => {
                                                     {searchResults.salons.map((salon) => (
                                                         <div key={salon.id} className="flex items-center gap-6 group cursor-pointer" onClick={() => {
                                                             setIsSearchOpen(false);
-                                                            navigate(`/salons/${salon.id}`);
+                                                            navigate("/services-simple");
                                                         }}>
                                                             <div className="w-20 h-24 bg-white rounded-xl overflow-hidden shadow-sm flex-shrink-0">
                                                                 <img

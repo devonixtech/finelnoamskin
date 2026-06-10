@@ -206,9 +206,20 @@ export default function CustomersPage() {
         if (!userId) continue;
 
         if (!customerMap.has(userId)) {
+          let extractedName = booking.full_name;
+          if (!extractedName && booking.notes) {
+            const walkInMatch = booking.notes.match(/(?:Walk-in|Manual Customer):\s*([^|,#\n]+)/);
+            if (walkInMatch && walkInMatch[1].trim() && walkInMatch[1].trim() !== "undefined") {
+              extractedName = walkInMatch[1].trim();
+            }
+          }
+          if (!extractedName) {
+            extractedName = booking.email || "Client #" + userId.slice(0, 4);
+          }
+
           customerMap.set(userId, {
             user_id: userId,
-            full_name: booking.full_name || booking.email || "Client #" + userId.slice(0, 4),
+            full_name: extractedName,
             phone: booking.phone || null,
             email: booking.email || null,
             avatar_url: booking.avatar_url || null,

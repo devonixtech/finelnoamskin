@@ -14,9 +14,9 @@ const FeaturedFacialSection = () => {
     const navigate = useNavigate();
 
     const services = [
-        { name: "BUCCAL MASSAGE", link: "/salons?search=Buccal" },
-        { name: "FACIALS", link: "/salons?category=Facials" },
-        { name: "SKIN CONSULT", link: "/salons?category=Consultation" },
+        { name: "BUCCAL MASSAGE", link: "/services-simple?search=Buccal" },
+        { name: "FACIALS", link: "/services-simple?category=Facials" },
+        { name: "SKIN CONSULT", link: "/services-simple?category=Consultation" },
     ];
     const facialService = {
         category: "Facial",

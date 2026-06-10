@@ -40,7 +40,7 @@ const CartPage = () => {
  Looks like you haven't added anything to your bag yet. Explore our services and products to find what suits you best.
  </p>
  <Button asChild className="bg-[#1A1A1A] hover:bg-[#1A1A1A]/90 text-white px-8 md:px-10 h-12 md:h-14 rounded-full text-base md:text-lg">
- <Link to="/salons">Start Shopping</Link>
+ <Link to="/services-simple">Start Shopping</Link>
  </Button>
  </div>
  ) : (

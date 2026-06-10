@@ -719,8 +719,13 @@ export const staffProfilesAPI = {
 export const notificationsAPI = {
     async getAll(filters?: { salon_id?: string; unread_only?: string }) {
         const params = new URLSearchParams(filters as any);
-        const data = await fetchWithAuth(`/notifications?${params}`);
-        return toArray(data, 'notifications');
+        try {
+            const data = await fetchWithAuth(`/notifications?${params}`);
+            return toArray(data, 'notifications');
+        } catch (error) {
+            console.error('[notificationsAPI.getAll] Falling back to empty notifications list:', error);
+            return [];
+        }
     },
 
     async markAsRead(id: string) {

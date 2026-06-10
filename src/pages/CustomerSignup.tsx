@@ -20,6 +20,7 @@ import {
 import { countryCodes } from "@/utils/countryCodes";
 
 const CustomerSignup = () => {
+    const MAX_PHONE_DIGITS = 12;
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [countryCode, setCountryCode] = useState("Malaysia-+60");
@@ -59,6 +60,24 @@ const CustomerSignup = () => {
             toast({
                 title: "Weak Password",
                 description: "For your security, please use at least 6 characters.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (phone && !/^\d+$/.test(phone)) {
+            toast({
+                title: "Invalid Phone Number",
+                description: "Phone number must contain digits only.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (phone && phone.length > MAX_PHONE_DIGITS) {
+            toast({
+                title: "Invalid Phone Number",
+                description: `Phone number cannot be longer than ${MAX_PHONE_DIGITS} digits.`,
                 variant: "destructive",
             });
             return;
@@ -172,7 +191,10 @@ const CustomerSignup = () => {
                                         type="tel"
                                         placeholder="000 000 0000"
                                         value={phone}
-                                        onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, MAX_PHONE_DIGITS))}
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        maxLength={MAX_PHONE_DIGITS}
                                         className="h-14 bg-slate-50 border-none rounded-2xl font-bold px-5 shadow-inner flex-1 transition-all focus:bg-white focus:ring-2 focus:ring-accent/10"
                                     />
                                 </div>

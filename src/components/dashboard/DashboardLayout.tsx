@@ -23,8 +23,6 @@ import {
   ShoppingBag,
   Mail,
   BookOpen,
-  Moon,
-  Sun,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,7 +42,6 @@ import { cn } from "@/lib/utils";
 import { SalonNotificationSystem } from "./SalonNotificationSystem";
 import { PendingApproval } from "./PendingApproval";
 import { Loader2 } from "lucide-react";
-import { useTheme } from "@/context/ThemeProvider";
 import api from "@/services/api";
 
 interface DashboardLayoutProps {
@@ -56,7 +53,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { salons, currentSalon, setCurrentSalon, isOwner, isManager, isStaff, refreshSalons } = useSalon();
   const [appointmentCount, setAppointmentCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -649,15 +645,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <Separator orientation="vertical" className="h-6 bg-border hidden md:block" />
 
             <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl"
-                onClick={toggleTheme}
-              >
-                {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              </Button>
-
               <SalonNotificationSystem onUnreadCountChange={setUnreadCount} />
 
               <div className="relative h-11 w-11 rounded-xl border-2 border-border/30 hover:border-accent/50 transition-colors cursor-pointer lg:hidden" onClick={() => navigate(`${basePath}/notifications`)}>

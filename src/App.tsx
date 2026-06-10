@@ -13,7 +13,6 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
-import SalonListing from "./pages/SalonListing";
 import ContactUs from "./pages/ContactUs";
 import CustomerSignup from "./pages/CustomerSignup";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -119,8 +118,8 @@ const App = () => {
                         <Routes>
                           <Route path="/" element={<Index />} />
                           <Route path="/about" element={<AboutUs />} />
-                          <Route path="/salons" element={<SalonListing />} />
-                          <Route path="/salons/:id" element={<SalonServices />} />
+                          <Route path="/salons" element={<SalonOwnerSignup />} />
+                          <Route path="/salons/:id" element={<SalonOwnerSignup />} />
                           <Route path="/cart" element={<CartPage />} />
                           <Route path="/shop" element={<RetailShop />} />
                           <Route path="/product/:id" element={<ProductDetails />} />

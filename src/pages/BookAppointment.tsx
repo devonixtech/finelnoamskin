@@ -172,7 +172,7 @@ const BookAppointment = () => {
   useEffect(() => {
     if (!salonId) {
       toast({ title: "No Salon Selected", description: "Choosing the best for you...", variant: "default" });
-      navigate("/salons");
+      navigate("/services-simple");
       return;
     }
     fetchSalonAndServices();
@@ -272,7 +272,7 @@ const BookAppointment = () => {
     } catch (error) {
       console.error("Error fetching salon data:", error);
       toast({ title: "Error", description: error.message || "Could not connect to the server. Please check your internet connection.", variant: "destructive" });
-      navigate("/salons");
+      navigate("/services-simple");
     } finally {
       setLoading(false);
     }

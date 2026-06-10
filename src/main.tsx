@@ -24,6 +24,19 @@ window.onunhandledrejection = (event) => {
   console.error("Unhandled Promise Rejection:", event.reason);
 };
 
+window.addEventListener("vite:preloadError", (event) => {
+  event.preventDefault();
+
+  const reloadKey = "vite-preload-recovery";
+  if (sessionStorage.getItem(reloadKey) === "1") {
+    sessionStorage.removeItem(reloadKey);
+    return;
+  }
+
+  sessionStorage.setItem(reloadKey, "1");
+  window.location.reload();
+});
+
 const root = createRoot(document.getElementById("root")!);
 
 root.render(
