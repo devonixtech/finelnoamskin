@@ -354,8 +354,8 @@ export const bookingsAPI = {
 
 // Search API
 export const searchAPI = {
-    async query(q: string) {
-        return await fetchWithAuth(`/search?q=${encodeURIComponent(q)}`);
+    async query(q: string, salon_id?: string) {
+        if (salon_id) { return await fetchWithAuth(`/search/dashboard?q=${encodeURIComponent(q)}&salon_id=${salon_id}`); } return await fetchWithAuth(`/search?q=${encodeURIComponent(q)}`);
     }
 };
 

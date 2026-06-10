@@ -251,7 +251,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       if (searchQuery.trim().length >= 2) {
         setIsSearching(true);
         try {
-          const data = await api.search.query(searchQuery);
+          const data = await api.search.query(searchQuery, currentSalon?.id);
           setSearchResults(data);
         } catch (error) {
           console.error("Search error:", error);
