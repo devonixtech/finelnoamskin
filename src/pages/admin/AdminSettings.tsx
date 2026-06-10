@@ -47,7 +47,7 @@ export default function AdminSettings() {
   const tabParam = searchParams.get("tab");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState(tabParam || "general");
+  const [activeTab, setActiveTab] = useState(tabParam || "economy");
 
   const [settings, setSettings] = useState<PlatformSettings>({
     platform_name: "GlamBook Local",
@@ -136,12 +136,12 @@ export default function AdminSettings() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-muted/10 p-1 rounded-2xl border border-white/5 shadow-sm w-full grid grid-cols-5 h-16 mb-8">
-            <TabsTrigger value="general" className="rounded-xl px-2 font-bold data-[state=active]:bg-[#55402f] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400">General</TabsTrigger>
+          <TabsList className="bg-muted/10 p-1 rounded-2xl border border-white/5 shadow-sm w-full grid grid-cols-3 h-16 mb-8">
+            {/* <TabsTrigger value="general" className="rounded-xl px-2 font-bold data-[state=active]:bg-[#55402f] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400">General</TabsTrigger> */}
             <TabsTrigger value="billing" className="rounded-xl px-2 font-bold data-[state=active]:bg-[#55402f] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400">Billing</TabsTrigger>
             <TabsTrigger value="economy" className="rounded-xl px-2 font-bold data-[state=active]:bg-[#55402f] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400">Loyalty</TabsTrigger>
             <TabsTrigger value="notifications" className="rounded-xl px-2 font-bold data-[state=active]:bg-[#55402f] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400">Alerts</TabsTrigger>
-            <TabsTrigger value="legal" className="rounded-xl px-2 font-bold data-[state=active]:bg-[#55402f] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400">Legal</TabsTrigger>
+            {/* <TabsTrigger value="legal" className="rounded-xl px-2 font-bold data-[state=active]:bg-[#55402f] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400">Legal</TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="general" className="space-y-6 animate-in fade-in duration-500">
