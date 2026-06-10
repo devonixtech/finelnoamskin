@@ -645,7 +645,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <Separator orientation="vertical" className="h-6 bg-border hidden md:block" />
 
             <div className="flex items-center gap-3">
-              <SalonNotificationSystem onUnreadCountChange={setUnreadCount} />
+              {/* <SalonNotificationSystem onUnreadCountChange={setUnreadCount} /> */}
 
               <div className="relative h-11 w-11 rounded-xl border-2 border-border/30 hover:border-accent/50 transition-colors cursor-pointer lg:hidden" onClick={() => navigate(`${basePath}/notifications`)}>
                 <Avatar className="h-full w-full">
