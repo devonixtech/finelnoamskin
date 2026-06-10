@@ -15,7 +15,6 @@ import SkinConcernSection from "@/components/SkinConcernSection";
 import SkinAdviceSection from "@/components/SkinAdviceSection";
 import FacialMenuSection from "@/components/FacialMenuSection";
 import BestSellersSection from "@/components/BestSellersSection";
-import ReviewsSection from "@/components/ReviewsSection";
 import BeforeAfterSection from "@/components/BeforeAfterSection";
 import InsideSpaceSection from "@/components/InsideSpaceSection";
 import BecomeMemberSection from "@/components/BecomeMemberSection";
@@ -71,10 +70,6 @@ const Index = () => {
 
       <div id="skin-advice">
         <SkinAdviceSection />
-      </div>
-
-      <div id="reviews">
-        <ReviewsSection />
       </div>
 
       {/* <div id="before-after">
