@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import BrandLogo from "@/components/BrandLogo";
 import { useSearchParams } from "react-router-dom";
 import {
   CreditCard,
@@ -274,30 +275,14 @@ export default function AdminPaymentsEnhanced() {
         </Card>
 
         {/* Invoice Detail Dialog (Same design as BillingPage for consistency) */}
-        <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-none bg-white rounded-3xl shadow-2xl">
-            {selectedPayment && (
-              <div className="flex flex-col">
-                <div className="p-8 md:p-12 space-y-12 text-sm text-[#444] print-only">
-                  <div className="flex justify-between items-start">
-                    <div className="relative flex items-center justify-center w-16 h-16">
-                      <span className="text-5xl font-black text-[#0066FF] leading-none">S</span>
-                      <span className="text-5xl font-black text-[#0066FF] leading-none -ml-3 transform skew-x-[15deg] border-l-4 border-white pl-1">A</span>
-                    </div>
-                    <div className="text-right">
-                      <h2 className="text-3xl font-black text-slate-900 mb-4">Platform Invoice</h2>
-                      <div className="space-y-1 text-slate-500 font-medium text-sm">
-                        <p>Invoice no: <span className="text-slate-900">{selectedPayment.id}</span></p>
-                        <p>Invoice date: <span className="text-slate-900">{format(new Date(selectedPayment.created_at), "MMM d, yyyy")}</span></p>
-                      </div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8">
                     <div>
                       <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-2">From</p>
-                      <p className="text-lg font-black text-slate-900 mb-1">Salon Pro Platform</p>
-                      <p className="font-medium text-slate-500">billing@salonpro.local</p>
+                      <p className="text-lg font-black text-slate-900 mb-1">Noamskin</p>
+                      <p className="font-medium text-slate-500">hello@noamskin.com</p>
                     </div>
                     <div>
                       <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-2">Bill to</p>
@@ -310,7 +295,7 @@ export default function AdminPaymentsEnhanced() {
                   <div className="overflow-hidden rounded-xl border border-slate-100 shadow-sm">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-[#0066FF] text-white font-bold uppercase tracking-widest text-[10px]">
+                        <tr className="bg-[#1A1A1A] text-white font-bold uppercase tracking-widest text-[10px]">
                           <th className="px-6 py-4">Description</th>
                           <th className="px-6 py-4 text-right">Amount</th>
                         </tr>
