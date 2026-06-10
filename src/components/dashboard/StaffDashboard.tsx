@@ -201,6 +201,7 @@ export function StaffDashboard() {
             toast({ title: "Record Saved", description: "Treatment details successfully logged." });
             setRecordBookingId(null);
             setTreatmentData({ treatment_details: "", products_used: "", skin_reaction: "", improvement_notes: "" });
+            fetchData();
         } catch (error: any) {
             toast({ title: "Error", description: error.message || "Could not save treatment record.", variant: "destructive" });
         } finally {
@@ -242,12 +243,12 @@ export function StaffDashboard() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-1">
                     <h1 className="text-4xl font-black text-foreground tracking-tight">
-                        Hello, {staffInfo?.display_name?.split(' ')?.[0] || 'Staff'} 👋
+                        Hello, {staffInfo?.display_name?.split(' ')?.[0] || 'Staff'} ðŸ‘‹
                     </h1>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
                         {isClockedIn && currentSession?.check_in
-                            ? `Duty Active • Started ${format(parseISO(currentSession.check_in.replace(' ', 'T')), "h:mm a")}`
-                            : "Shift Pending • System Ready"}
+                            ? `Duty Active â€¢ Started ${format(parseISO(currentSession.check_in.replace(' ', 'T')), "h:mm a")}`
+                            : "Shift Pending â€¢ System Ready"}
                     </p>
                 </div>
 
@@ -390,9 +391,31 @@ export function StaffDashboard() {
                                                 </p>
                                             )}
                                             {b.status === 'completed' && (
-                                                <Badge className="bg-emerald-100 text-emerald-600 border-none font-black text-[10px] uppercase tracking-widest h-10 px-6 rounded-xl flex items-center gap-2">
-                                                    <CheckCircle className="w-4 h-4" /> Accomplished
-                                                </Badge>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge className="bg-emerald-100 text-emerald-600 border-none font-black text-[10px] uppercase tracking-widest h-10 px-6 rounded-xl flex items-center gap-2">
+                                                        <CheckCircle className="w-4 h-4" /> Accomplished
+                                                    </Badge>
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => {
+                                                            const record = b.treatment_records?.[0];
+                                                            if (record) {
+                                                                setTreatmentData({
+                                                                    treatment_details: record.treatment_details || "",
+                                                                    products_used: record.products_used || "",
+                                                                    skin_reaction: record.skin_reaction || "",
+                                                                    improvement_notes: record.improvement_notes || ""
+                                                                });
+                                                            } else {
+                                                                setTreatmentData({ treatment_details: "", products_used: "", skin_reaction: "", improvement_notes: "" });
+                                                            }
+                                                            setRecordBookingId(b.id);
+                                                        }}
+                                                        className="h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#55402f] border-[#55402f]/20 hover:bg-[#55402f]/5 transition-all active:scale-95"
+                                                    >
+                                                        View Log
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     </CardContent>
@@ -441,6 +464,18 @@ export function StaffDashboard() {
                 {/* Tactical Links & Messages */}
                 <div className="space-y-8">
                     <div className="space-y-4">
+                        {staffInfo?.assigned_services && staffInfo.assigned_services.length > 0 && (
+                            <div className="space-y-4 mb-8">
+                                <h3 className="text-xl font-black text-foreground uppercase tracking-tight px-2">My Assigned Services</h3>
+                                <div className="flex flex-wrap gap-2 px-2">
+                                    {staffInfo.assigned_services.map((service: any, i: number) => (
+                                        <Badge key={i} className="bg-[#55402f]/10 text-[#55402f] border-none font-black text-[10px] uppercase tracking-widest px-4 py-2 rounded-xl">
+                                            {service.name}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                         <h3 className="text-xl font-black text-foreground uppercase tracking-tight px-2">Operational Hub</h3>
                         <div className="grid grid-cols-1 gap-4">
                             {[
@@ -515,7 +550,7 @@ export function StaffDashboard() {
                             <div className="space-y-2">
                                 <h4 className="text-lg font-black tracking-tight">Deployment Ready</h4>
                                 <p className="text-[10px] font-bold text-white/50 leading-relaxed uppercase tracking-widest">
-                                    Last Sync: {format(lastSync, "h:mm:ss a")} • System Optimized
+                                    Last Sync: {format(lastSync, "h:mm:ss a")} â€¢ System Optimized
                                 </p>
                             </div>
                             <Button
