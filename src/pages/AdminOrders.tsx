@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Loader2, Package, Truck, CheckCircle, XCircle, MapPin, Phone, User, Globe } from 'lucide-react';
+import { Loader2, Package, Truck, CheckCircle, XCircle, MapPin, Phone, User, Globe, Eye } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 const AdminOrdersPage = () => {
@@ -135,13 +135,23 @@ const AdminOrdersPage = () => {
                                                 </Badge>
                                             </td>
                                             <td className="p-6 text-right">
-                                                <Select
-                                                    value={order.status}
-                                                    onValueChange={(val) => handleStatusChange(order.id, val)}
-                                                >
-                                                    <SelectTrigger className="w-[160px] h-10 ml-auto bg-white border-slate-200 rounded-full shadow-sm hover:border-accent/50 hover:shadow-md transition-all duration-200">
-                                                        <SelectValue placeholder="Update Status" />
-                                                    </SelectTrigger>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-10 w-10 text-slate-400 hover:text-accent hover:bg-accent/10 rounded-full"
+                                                        onClick={() => setSelectedOrder(order)}
+                                                        title="View Client Details"
+                                                    >
+                                                        <Eye className="w-5 h-5" />
+                                                    </Button>
+                                                    <Select
+                                                        value={order.status}
+                                                        onValueChange={(val) => handleStatusChange(order.id, val)}
+                                                    >
+                                                        <SelectTrigger className="w-[160px] h-10 bg-white border-slate-200 rounded-full shadow-sm hover:border-accent/50 hover:shadow-md transition-all duration-200">
+                                                            <SelectValue placeholder="Update Status" />
+                                                        </SelectTrigger>
                                                     <SelectContent className="rounded-xl p-1">
                                                         <SelectItem value="placed" className="rounded-lg focus:bg-slate-50 my-1 cursor-pointer">
                                                             <div className="flex items-center gap-2.5">
@@ -176,7 +186,8 @@ const AdminOrdersPage = () => {
                                                             </div>
                                                         </SelectItem>
                                                     </SelectContent>
-                                                </Select>
+                                                    </Select>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
