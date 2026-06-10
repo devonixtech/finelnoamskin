@@ -74,6 +74,7 @@ export function StaffDashboard() {
                 setStaffInfo(data.staff);
                 setStats(data.stats);
                 setTodayBookings(data.today_bookings || []);
+                setUpcomingBookings(data.upcoming_bookings || []);
                 setUnreadMessagesCount(data.unread_messages || 0);
 
                 if (data.attendance) {
