@@ -960,7 +960,6 @@ const BookAppointment = () => {
                     </div>
                   )}
 
-                  {/* Offer/Coupon Code Section HIDDEN AS IT IS NOT INTEGRATED IN ADMIN
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
                       <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Have an Offer Code?</Label>
@@ -986,11 +985,6 @@ const BookAppointment = () => {
                         </div>
                       )}
                     </div>
-                  */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Empty placeholder to keep loyalty points on right if preferred, or just remove md:grid-cols-2 */}
-                    <div className="hidden md:block"></div>
-
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Use Loyalty points</Label>

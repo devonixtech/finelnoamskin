@@ -546,6 +546,27 @@ export const adminAPI = {
             method: 'DELETE',
         });
     },
+
+    async getBanners() {
+        // Mocked as backend does not have platform_banners routes yet
+        return [];
+    },
+
+    async createBanner(data: any) {
+        // Mocked as backend does not have platform_banners routes yet
+        return { success: true, data };
+    },
+
+    async getOffers() {
+        return await fetchWithAuth('/offers');
+    },
+
+    async createOffer(data: any) {
+        return await fetchWithAuth('/offers', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
 };
 
 // User Roles API

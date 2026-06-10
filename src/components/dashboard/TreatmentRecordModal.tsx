@@ -86,7 +86,7 @@ export function TreatmentRecordModal({ booking, open, onOpenChange }: TreatmentR
         } catch (error: any) {
             toast({
                 title: "Error",
-                description: error.message || "Failed to save record",
+                description: error.detail || error.message || "Failed to save record",
                 variant: 'destructive',
             });
         } finally {
