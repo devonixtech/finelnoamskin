@@ -149,7 +149,7 @@ const AdminOrdersPage = () => {
                                                         value={order.status}
                                                         onValueChange={(val) => handleStatusChange(order.id, val)}
                                                     >
-                                                        <SelectTrigger className="w-[160px] h-10 bg-white border-slate-200 rounded-full shadow-sm hover:border-accent/50 hover:shadow-md transition-all duration-200">
+                                                        <SelectTrigger className="w-[160px] h-10 bg-white border-slate-200 text-slate-800 font-bold rounded-full shadow-sm hover:border-accent/50 hover:shadow-md transition-all duration-200">
                                                             <SelectValue placeholder="Update Status" />
                                                         </SelectTrigger>
                                                     <SelectContent className="rounded-xl p-1">
@@ -235,7 +235,7 @@ const AdminOrdersPage = () => {
                                     <div className="space-y-1">
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Contact</p>
                                         <p className="font-medium text-slate-900">
-                                            {selectedOrder.shipping_address.phone || 'N/A'}
+                                            {selectedOrder.shipping_address?.phone || selectedOrder.customer_phone || selectedOrder.phone || 'N/A'}
                                         </p>
                                     </div>
                                 </div>

@@ -220,7 +220,7 @@ export default function CustomersPage() {
           customerMap.set(userId, {
             user_id: userId,
             full_name: extractedName,
-            phone: booking.phone || null,
+            phone: booking.phone || booking.customer_phone || booking.user_phone || null,
             email: booking.email || null,
             avatar_url: booking.avatar_url || null,
             total_visits: 0,

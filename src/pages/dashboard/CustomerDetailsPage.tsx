@@ -195,7 +195,7 @@ export default function CustomerDetailsPage() {
                             }
                         }
                     }
-                    if (!extractedPhone) extractedPhone = b.phone || b.user_phone;
+                    if (!extractedPhone) extractedPhone = b.phone || b.user_phone || b.customer_phone;
                     if (!extractedEmail) extractedEmail = b.email;
                 }
 
