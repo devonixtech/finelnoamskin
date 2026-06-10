@@ -57,8 +57,8 @@ const navigation = [
   {
     title: "Inventory & Growth",
     items: [
-      { icon: Zap, label: "Membership Plans", path: "/super-admin/plans" },
-      { icon: Shield, label: "Plan Assignments", path: "/super-admin/members" },
+      // { icon: Zap, label: "Membership Plans", path: "/super-admin/plans" },
+      // { icon: Shield, label: "Plan Assignments", path: "/super-admin/members" },
       { icon: Plus, label: "Add Product", path: "/super-admin/products/add" },
       { icon: Package, label: "Products", path: "/super-admin/products" },
     ]
