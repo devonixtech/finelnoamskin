@@ -167,8 +167,8 @@ export default function ServiceDetail() {
                         </div>
 
                         <div className="space-y-1">
-                            <h1 className="text-3xl md:text-3xl font-bold text-slate-900 flex items-center">
-                                <span className="px-2 rounded mr-2 h-8 inline-flex items-center text-slate-700">
+                            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
+                                <span className="text-slate-700 mr-1.5">
                                     {service.name.split(' ')[0]}
                                 </span>
                                 {service.name.split(' ').slice(1).join(' ')}
