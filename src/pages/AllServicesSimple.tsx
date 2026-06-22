@@ -402,8 +402,9 @@ const AllServicesSimple = () => {
                                 className="w-full h-full object-cover"
                                 alt="Logo"
                                 onError={(e) => {
-                                  e.currentTarget.src = getImageUrl(null, 'logo', service.id);
-                                }}
+    e.currentTarget.onerror = null; // Prevent infinite loop
+    e.currentTarget.src = getImageUrl(null, 'logo', service.id);
+  }}
                               />
                             </div>
                           </div>
