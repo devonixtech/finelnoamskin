@@ -85,6 +85,9 @@ const MembershipDetailsPage = React.lazy(() => import("./pages/MembershipDetails
 const queryClient = new QueryClient();
 
 const App = () => {
+  const isAdminSubdomain = 
+    window.location.hostname.startsWith('admin.') || 
+    localStorage.getItem('simulate_admin_subdomain') === 'true';
   console.log("[App.tsx] App component rendering...");
   const [isInitialLoading, setIsInitialLoading] = React.useState(true);
 
@@ -116,7 +119,7 @@ const App = () => {
                     <div id="app-routes-container">
                       <React.Suspense fallback={<SiteLoader />}>
                         <Routes>
-                          <Route path="/" element={<Index />} />
+                          <Route path="/" element={isAdminSubdomain ? <SimpleAdminAccess /> : <Index />} />
                           <Route path="/about" element={<AboutUs />} />
                           <Route path="/salons" element={<SalonOwnerSignup />} />
                           <Route path="/salons/:id" element={<SalonOwnerSignup />} />
@@ -133,7 +136,7 @@ const App = () => {
                           <Route path="/supabase-debug" element={<Navigate to="/admin-access" replace />} />
                           <Route path="/create-admin" element={<Navigate to="/admin-access" replace />} />
                           <Route path="/direct-admin" element={<Navigate to="/admin-access" replace />} />
-                          <Route path="/login" element={<Login />} />
+                          <Route path="/login" element={isAdminSubdomain ? <SimpleAdminAccess /> : <Login />} />
                           <Route path="/signup" element={<CustomerSignup />} />
                           <Route path="/membership" element={<MembershipDetailsPage />} />
                           <Route path="/forgot-password" element={<ForgotPassword />} />

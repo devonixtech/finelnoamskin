@@ -45,23 +45,20 @@ const Login = () => {
       // Get the current user to check user type
       const userData = await api.auth.getCurrentUser();
       const userType = userData?.user?.user_type;
-      const salonRole = userData?.user?.salon_role;
 
-      toast({
-        title: "Session Established",
-        description: "Accessing local management console...",
-      });
-
-      // Strict Redirect Logic based on User Type and Roles
-      if (userType === 'admin') {
-        navigate("/super-admin/dashboard");
-      } else if (salonRole === 'staff') {
-        navigate("/staff/dashboard");
-      } else if (userType === 'salon_owner' || (salonRole && ['owner', 'manager'].includes(salonRole))) {
-        navigate("/salon/dashboard");
-      } else if (userType === 'customer') {
+      // Restrict to customer only
+      if (userType === 'customer') {
+        toast({
+          title: "Welcome Back!",
+          description: "Accessing your client dashboard...",
+        });
         navigate("/user/dashboard");
       } else {
+        toast({
+          title: "Access Denied",
+          description: "This portal is for member login only. Administrators and salon owners please use the admin access page.",
+          variant: "destructive",
+        });
         await signOut();
         navigate("/login");
       }
@@ -103,16 +100,16 @@ const Login = () => {
               <img src={logo} alt="Saloon Logo" className="h-16 w-auto" />
             </Link>
             <CardTitle className="text-4xl font-black text-slate-900 tracking-tight">Sign In</CardTitle>
-            <CardDescription className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mt-2">Secure Access to Your Account</CardDescription>
+            <CardDescription className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mt-2">Member Portal Secure Access</CardDescription>
           </CardHeader>
           <form onSubmit={handleLogin}>
             <CardContent className="space-y-6 px-10">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Business Identifier (Email)</Label>
+                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="owner@saloon.com"
+                  placeholder="member@salon.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-14 bg-slate-50 border-none rounded-2xl font-bold px-5 shadow-inner"
@@ -149,10 +146,10 @@ const Login = () => {
                 {loading ? (
                   <>
                     <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                    SYNCING...
+                    SIGNING IN...
                   </>
                 ) : (
-                  "ACCESS DASHBOARD"
+                  "SIGN IN"
                 )}
               </Button>
               <div className="text-center space-y-4">
@@ -162,9 +159,9 @@ const Login = () => {
                   <Link to="/privacy" className="text-slate-500 underline">Privacy Policy</Link>
                 </p>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
-                  New Partner?{" "}
+                  New Customer?{" "}
                   <Link to="/signup" className="text-accent underline font-black">
-                    Enroll Instance
+                    Sign Up
                   </Link>
                 </p>
               </div>

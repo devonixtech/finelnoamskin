@@ -277,21 +277,6 @@ const Navbar = () => {
                                         </Link>
                                     </DropdownMenuItem>
 
-                                    <DropdownMenuSeparator className="bg-slate-50 my-2" />
-
-                                    <DropdownMenuItem asChild className="rounded-xl h-14 focus:bg-[#F3EEEA] focus:text-[#1A1A1A] cursor-pointer transition-colors px-4">
-                                        <Link to="/salon-owner/signup" className="flex items-center justify-between w-full group">
-                                            <div className="flex items-center gap-3">
-                                                <Store className="w-5 h-5 text-slate-400 group-focus:text-[#1A1A1A] transition-colors" />
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-sm">Salon Owner</span>
-                                                    <span className="text-[10px] text-slate-500 font-medium">Register your business</span>
-                                                </div>
-                                            </div>
-                                            <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-accent" />
-                                        </Link>
-                                    </DropdownMenuItem>
-
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}

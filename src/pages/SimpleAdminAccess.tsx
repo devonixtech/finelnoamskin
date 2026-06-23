@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Shield, Lock, User, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
+import api from "@/services/api";
 
 export default function SimpleAdminAccess() {
   const [searchParams] = useSearchParams();
@@ -16,27 +17,68 @@ export default function SimpleAdminAccess() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { user, loading: authLoading, login, signOut } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      const userType = user.user_type;
+      const salonRole = user.salon_role;
+
+      if (userType === 'admin') {
+        navigate("/admin");
+      } else if (userType === 'salon_owner' || (salonRole && ['owner', 'manager'].includes(salonRole))) {
+        navigate("/salon/dashboard");
+      } else if (salonRole === 'staff') {
+        navigate("/staff/dashboard");
+      }
+    }
+  }, [user, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      console.log('Attempting local admin login...');
-      await login(email, password);
+      console.log('Attempting admin/partner login...');
+      await login(email.trim(), password);
 
-      toast({
-        title: "Welcome Super Admin!",
-        description: "Redirecting to admin dashboard...",
-      });
-      navigate("/admin");
+      // Get user type and redirect accordingly
+      const userData = await api.auth.getCurrentUser();
+      const userType = userData?.user?.user_type;
+      const salonRole = userData?.user?.salon_role;
+
+      if (userType === 'admin') {
+        toast({
+          title: "Welcome Super Admin!",
+          description: "Redirecting to admin dashboard...",
+        });
+        navigate("/admin");
+      } else if (userType === 'salon_owner' || (salonRole && ['owner', 'manager'].includes(salonRole))) {
+        toast({
+          title: "Welcome Salon Owner/Manager!",
+          description: "Redirecting to salon dashboard...",
+        });
+        navigate("/salon/dashboard");
+      } else if (salonRole === 'staff') {
+        toast({
+          title: "Welcome Staff!",
+          description: "Redirecting to staff dashboard...",
+        });
+        navigate("/staff/dashboard");
+      } else {
+        toast({
+          title: "Access Denied",
+          description: "Only administrators and salon partners are allowed here. Customers please use the website login.",
+          variant: "destructive",
+        });
+        await signOut();
+      }
 
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid credentials in local registry",
+        description: error.message || "Invalid credentials",
         variant: "destructive",
       });
     } finally {
@@ -51,16 +93,16 @@ export default function SimpleAdminAccess() {
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
             <Shield className="w-6 h-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Super Admin Access</CardTitle>
+          <CardTitle className="text-2xl">Admin & Partner Access</CardTitle>
           <p className="text-muted-foreground">
-            Enter your credentials to access the admin panel
+            Enter your credentials to access your management dashboard
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              This is for platform super administrators only.
+              This portal is restricted to platform administrators and salon partners.
             </AlertDescription>
           </Alert>
 
@@ -72,7 +114,7 @@ export default function SimpleAdminAccess() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="superadmin@salon.com"
+                  placeholder="admin@salon.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
@@ -87,7 +129,7 @@ export default function SimpleAdminAccess() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="admin123"
+                  placeholder="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
@@ -96,12 +138,12 @@ export default function SimpleAdminAccess() {
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing In..." : "Access Admin Panel"}
+              {loading ? "Signing In..." : "Access Portal"}
             </Button>
           </form>
 
           <div className="bg-muted/50 p-3 rounded-lg text-sm">
-            <p className="font-medium text-center mb-2">Super Admin Credentials:</p>
+            <p className="font-medium text-center mb-2">Super Admin Credentials (Testing):</p>
             <p className="text-center text-muted-foreground">
               📧 Email: <span className="font-mono">superadmin@salon.com</span><br />
               🔑 Password: <span className="font-mono">admin123</span>
