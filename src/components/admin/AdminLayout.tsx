@@ -211,7 +211,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         )}
 
-
+        <Button
+          variant="ghost"
+          onClick={signOut}
+          className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10 gap-3 px-4 py-3 rounded-xl"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="font-bold text-sm">Sign Out</span>
+        </Button>
       </div>
     </div>
   );
@@ -244,6 +251,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </div>
 
           <NotificationSystem />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={signOut}
+            className="text-red-400 hover:text-red-300 hover:bg-gray-700"
+            title="Sign Out"
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
         </div>
       </header>
 

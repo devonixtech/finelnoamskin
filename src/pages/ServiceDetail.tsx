@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import api from "@/services/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { getImageUrl } from "@/utils/imageUrl";
 
 interface Service {
     id: string;
@@ -159,9 +160,12 @@ export default function ServiceDetail() {
                         <div className="relative -mt-16 md:-mt-20">
                             <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-[6px] border-white overflow-hidden shadow-md bg-white">
                                 <img
-                                    src={service.salon_logo_url || "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=200&h=200&fit=crop"}
+                                    src={getImageUrl(service.salon_logo_url, 'logo', service.salon_id)}
                                     alt={`${service.salon_name} logo`}
                                     className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        e.currentTarget.src = getImageUrl(null, 'logo', service.salon_id);
+                                    }}
                                 />
                             </div>
                         </div>
@@ -235,8 +239,6 @@ export default function ServiceDetail() {
                                         <p className="text-lg font-bold text-slate-900 mt-1">MYR {service.price}</p>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
 
@@ -315,7 +317,6 @@ export default function ServiceDetail() {
                                         </p>
 
                                         <div className="flex items-center gap-6 pt-2 flex-wrap">
-
                                             <div className="flex items-center gap-2">
                                                 <CheckCircle2 className="w-4 h-4" />
                                                 <span className="text-[10px] font-black uppercase tracking-widest">Hygienic</span>
@@ -330,7 +331,6 @@ export default function ServiceDetail() {
                                                 <CheckCircle2 className="w-4 h-4" />
                                                 <span className="text-[10px] font-black uppercase tracking-widest">Private & Relaxing Space</span>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>

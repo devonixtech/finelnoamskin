@@ -39,6 +39,8 @@ interface PlatformSettings {
   coin_min_redemption: number;
   coin_max_discount_percent: number;
   coin_signup_bonus: number;
+  shipping_fee: number;
+  free_shipping_min: number;
 }
 
 export default function AdminSettings() {
@@ -61,6 +63,8 @@ export default function AdminSettings() {
     coin_min_redemption: 10,
     coin_max_discount_percent: 50,
     coin_signup_bonus: 0,
+    shipping_fee: 15,
+    free_shipping_min: 150,
   });
 
   const fetchSettings = async () => {
@@ -72,16 +76,18 @@ export default function AdminSettings() {
       if (data) {
         setSettings({
           platform_name: data.platform_name || settings.platform_name,
-          platform_commission: Number(data.platform_commission || settings.platform_commission),
-          trial_days: Number(data.trial_days || settings.trial_days),
+          platform_commission: Number(data.platform_commission ?? settings.platform_commission),
+          trial_days: Number(data.trial_days ?? settings.trial_days),
           support_email: data.support_email || settings.support_email,
           currency: data.currency || settings.currency,
           auto_approve_salons: data.auto_approve_salons === true || data.auto_approve_salons === "1",
-          coin_price: Number(data.coin_price || settings.coin_price),
-          coin_earning_rate: Number(data.coin_earning_rate || settings.coin_earning_rate),
-          coin_min_redemption: Number(data.coin_min_redemption || settings.coin_min_redemption),
-          coin_max_discount_percent: Number(data.coin_max_discount_percent || settings.coin_max_discount_percent),
-          coin_signup_bonus: Number(data.coin_signup_bonus || settings.coin_signup_bonus),
+          coin_price: Number(data.coin_price ?? settings.coin_price),
+          coin_earning_rate: Number(data.coin_earning_rate ?? settings.coin_earning_rate),
+          coin_min_redemption: Number(data.coin_min_redemption ?? settings.coin_min_redemption),
+          coin_max_discount_percent: Number(data.coin_max_discount_percent ?? settings.coin_max_discount_percent),
+          coin_signup_bonus: Number(data.coin_signup_bonus ?? settings.coin_signup_bonus),
+          shipping_fee: Number(data.shipping_fee ?? settings.shipping_fee),
+          free_shipping_min: Number(data.free_shipping_min ?? settings.free_shipping_min),
         });
       }
     } catch (error) {
@@ -217,8 +223,9 @@ export default function AdminSettings() {
                   <Label className="text-[10px] font-black uppercase text-white/50 tracking-widest ml-1">Platform Tax (%)</Label>
                   <Input
                     type="number"
-                    value={settings.platform_commission}
-                    onChange={(e) => setSettings({ ...settings, platform_commission: Number(e.target.value) })}
+                    placeholder="0"
+                    value={settings.platform_commission === 0 ? '' : settings.platform_commission}
+                    onChange={(e) => setSettings({ ...settings, platform_commission: e.target.value === '' ? 0 : Number(e.target.value) })}
                     className="h-16 bg-muted/10 border-white/10 text-white rounded-2xl font-black px-8 text-2xl focus:ring-[#55402f]/20"
                   />
                 </div>
@@ -235,6 +242,26 @@ export default function AdminSettings() {
                       <SelectItem value="MYR" className="focus:bg-white/10">MYR (Malaysian Ringgit)</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase text-white/50 tracking-widest ml-1">Standard Shipping Fee ({settings.currency})</Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={settings.shipping_fee === 0 ? '' : settings.shipping_fee}
+                    onChange={(e) => setSettings({ ...settings, shipping_fee: e.target.value === '' ? 0 : Number(e.target.value) })}
+                    className="h-16 bg-muted/10 border-white/10 text-white rounded-2xl font-black px-8 text-2xl focus:ring-[#55402f]/20"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase text-white/50 tracking-widest ml-1">Free Shipping Minimum Order ({settings.currency})</Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={settings.free_shipping_min === 0 ? '' : settings.free_shipping_min}
+                    onChange={(e) => setSettings({ ...settings, free_shipping_min: e.target.value === '' ? 0 : Number(e.target.value) })}
+                    className="h-16 bg-muted/10 border-white/10 text-white rounded-2xl font-black px-8 text-2xl focus:ring-[#55402f]/20"
+                  />
                 </div>
               </div>
             </Card>
@@ -256,8 +283,9 @@ export default function AdminSettings() {
                     <Input
                       type="number"
                       step="0.01"
-                      value={settings.coin_price}
-                      onChange={(e) => setSettings({ ...settings, coin_price: Number(e.target.value) })}
+                      placeholder="0"
+                      value={settings.coin_price === 0 ? '' : settings.coin_price}
+                      onChange={(e) => setSettings({ ...settings, coin_price: e.target.value === '' ? 0 : Number(e.target.value) })}
                       className="h-16 bg-muted/10 border-white/10 text-white rounded-2xl font-black pl-24 pr-8 text-2xl focus:ring-[#55402f]/20"
                     />
                   </div>
@@ -269,8 +297,9 @@ export default function AdminSettings() {
                     <div className="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-white/40">1 Point per</div>
                     <Input
                       type="number"
-                      value={settings.coin_earning_rate}
-                      onChange={(e) => setSettings({ ...settings, coin_earning_rate: Number(e.target.value) })}
+                      placeholder="0"
+                      value={settings.coin_earning_rate === 0 ? '' : settings.coin_earning_rate}
+                      onChange={(e) => setSettings({ ...settings, coin_earning_rate: e.target.value === '' ? 0 : Number(e.target.value) })}
                       className="h-16 bg-muted/10 border-white/10 text-white rounded-2xl font-black pl-32 pr-12 text-2xl focus:ring-[#55402f]/20"
                     />
                     <div className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-white/40">{settings.currency}</div>
@@ -281,8 +310,9 @@ export default function AdminSettings() {
                   <Label className="text-[10px] font-black uppercase text-white/50 tracking-widest ml-1">Minimum Redemption</Label>
                   <Input
                     type="number"
-                    value={settings.coin_min_redemption}
-                    onChange={(e) => setSettings({ ...settings, coin_min_redemption: Number(e.target.value) })}
+                    placeholder="0"
+                    value={settings.coin_min_redemption === 0 ? '' : settings.coin_min_redemption}
+                    onChange={(e) => setSettings({ ...settings, coin_min_redemption: e.target.value === '' ? 0 : Number(e.target.value) })}
                     className="h-16 bg-muted/10 border-white/10 text-white rounded-2xl font-black px-8 text-2xl focus:ring-[#55402f]/20"
                   />
                   <p className="text-xs font-bold text-white/40 mt-2 uppercase">Minimum points required in balance to use for a booking.</p>
@@ -293,8 +323,9 @@ export default function AdminSettings() {
                     <Input
                       type="number"
                       max="100"
-                      value={settings.coin_max_discount_percent}
-                      onChange={(e) => setSettings({ ...settings, coin_max_discount_percent: Number(e.target.value) })}
+                      placeholder="0"
+                      value={settings.coin_max_discount_percent === 0 ? '' : settings.coin_max_discount_percent}
+                      onChange={(e) => setSettings({ ...settings, coin_max_discount_percent: e.target.value === '' ? 0 : Number(e.target.value) })}
                       className="h-16 bg-muted/10 border-white/10 text-white rounded-2xl font-black px-8 text-2xl focus:ring-[#55402f]/20"
                     />
                     <div className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-white/40">%</div>
@@ -305,8 +336,9 @@ export default function AdminSettings() {
                   <Label className="text-[10px] font-black uppercase text-white/50 tracking-widest ml-1">New Account Bonus</Label>
                   <Input
                     type="number"
-                    value={settings.coin_signup_bonus}
-                    onChange={(e) => setSettings({ ...settings, coin_signup_bonus: Number(e.target.value) })}
+                    placeholder="0"
+                    value={settings.coin_signup_bonus === 0 ? '' : settings.coin_signup_bonus}
+                    onChange={(e) => setSettings({ ...settings, coin_signup_bonus: e.target.value === '' ? 0 : Number(e.target.value) })}
                     className="h-16 bg-muted/10 border-white/10 text-white rounded-2xl font-black px-8 text-2xl focus:ring-[#55402f]/20"
                   />
                   <p className="text-xs font-bold text-white/40 mt-2 uppercase">Initial point balance for new users.</p>

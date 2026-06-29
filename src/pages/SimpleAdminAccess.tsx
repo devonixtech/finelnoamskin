@@ -12,8 +12,8 @@ import api from "@/services/api";
 
 export default function SimpleAdminAccess() {
   const [searchParams] = useSearchParams();
-  const [email, setEmail] = useState(searchParams.get('email') || "superadmin@salon.com");
-  const [password, setPassword] = useState(searchParams.get('password') || "admin123");
+  const [email, setEmail] = useState(searchParams.get('email') || "");
+  const [password, setPassword] = useState(searchParams.get('password') || "");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -142,13 +142,7 @@ export default function SimpleAdminAccess() {
             </Button>
           </form>
 
-          <div className="bg-muted/50 p-3 rounded-lg text-sm">
-            <p className="font-medium text-center mb-2">Super Admin Credentials (Testing):</p>
-            <p className="text-center text-muted-foreground">
-              📧 Email: <span className="font-mono">superadmin@salon.com</span><br />
-              🔑 Password: <span className="font-mono">admin123</span>
-            </p>
-          </div>
+
 
           <div className="text-center">
             <Button variant="link" onClick={() => navigate("/")} className="text-sm">

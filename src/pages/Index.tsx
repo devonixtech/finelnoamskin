@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import HeroVideoCarousel from "@/components/HeroVideoCarousel";
 
 
-import StatsSection from "@/components/StatsSection";
+
 import NewsletterSection from "@/components/NewsletterSection";
 import GlowConfidenceSection from "@/components/GlowConfidenceSection";
 import FeaturedFacialSection from "@/components/FeaturedFacialSection";
@@ -76,9 +76,7 @@ const Index = () => {
         <BeforeAfterSection />
       </div> */}
 
-      <div id="stats">
-        <StatsSection />
-      </div>
+
 
       {/* <div id="faq">
         <FAQSection />

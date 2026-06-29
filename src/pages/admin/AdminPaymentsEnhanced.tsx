@@ -26,6 +26,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -276,79 +279,89 @@ export default function AdminPaymentsEnhanced() {
 
         {/* Invoice Detail Dialog */}
         <Dialog open={!!selectedPayment} onOpenChange={(open) => !open && setSelectedPayment(null)}>
-          <DialogContent className="max-w-4xl p-0 overflow-hidden rounded-[2rem] border-none shadow-2xl bg-white">
+          <DialogContent className="max-w-4xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 rounded-2xl sm:rounded-[2rem] border-none shadow-2xl bg-white text-slate-900">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Invoice Details</DialogTitle>
+              <DialogDescription>Invoice breakdown for selected transaction</DialogDescription>
+            </DialogHeader>
+            
             {selectedPayment && (
               <>
-              <div id={`invoice-${selectedPayment.id}`} className="bg-white p-12 relative print:p-8">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-[100px] -z-10" />
-                  <div className="flex justify-between items-start mb-12 print:mb-8 border-b border-slate-100 pb-10">
+                <div id={`invoice-${selectedPayment.id}`} className="bg-white p-4 sm:p-10 relative print:p-8 w-full overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-[100px] -z-10 hidden sm:block" />
+                  
+                  {/* Top Header */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 sm:mb-10 print:mb-8 border-b border-slate-100 pb-6">
                     <div className="flex flex-col">
-                      <img src={logo} alt="Noamskin Logo" className="h-10 mb-6 w-auto object-contain object-left" />
-                      <div className="space-y-1 text-sm text-slate-500">
-                        <p className="font-bold">Noamskin Platform HQ</p>
+                      <img src={logo} alt="Noamskin Logo" className="h-8 sm:h-10 mb-3 sm:mb-4 w-auto object-contain object-left" />
+                      <div className="space-y-0.5 text-xs sm:text-sm text-slate-500">
+                        <p className="font-bold text-slate-800">Noamskin Platform HQ</p>
                         <p>Kuala Lumpur, Malaysia</p>
                       </div>
                     </div>
                     
-                    <div className="text-right">
-                      <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2">Invoice</h2>
-                      <p className="font-bold text-slate-500 uppercase tracking-widest text-[10px]">#{selectedPayment.id?.substring(0, 8)}</p>
-                      <p className="text-sm font-bold text-slate-400 mt-4">{format(new Date(selectedPayment.created_at || new Date()), "MMM dd, yyyy")}</p>
+                    <div className="text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0">
+                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Invoice</h2>
+                      <p className="font-mono font-bold text-slate-500 uppercase tracking-widest text-[11px] bg-slate-100 px-2.5 py-0.5 rounded-md inline-block">#{selectedPayment.id?.substring(0, 8)}</p>
+                      <p className="text-xs sm:text-sm font-bold text-slate-400 mt-2">{format(new Date(selectedPayment.created_at || new Date()), "MMM dd, yyyy")}</p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8 mb-10">
-                    <div>
-                      <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-2">From</p>
-                      <p className="text-lg font-black text-slate-900 mb-1">Noamskin</p>
-                      <p className="font-medium text-slate-500">hello@noamskin.com</p>
+                  {/* From / Bill To Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
+                    <div className="bg-slate-50/60 p-4 rounded-xl border border-slate-100/80">
+                      <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-1.5">From</p>
+                      <p className="text-base font-black text-slate-900 mb-0.5">Noamskin</p>
+                      <p className="text-xs sm:text-sm font-medium text-slate-600">hello@noamskin.com</p>
                     </div>
-                    <div>
-                      <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-2">Bill to</p>
-                      <p className="text-lg font-black text-slate-900 mb-1">{selectedPayment.salon_name}</p>
-                      <p className="font-medium text-slate-500">{selectedPayment.salon_email}</p>
-                      <p className="font-medium text-slate-500">{selectedPayment.salon_address}</p>
+                    <div className="bg-slate-50/60 p-4 rounded-xl border border-slate-100/80">
+                      <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-1.5">Bill to</p>
+                      <p className="text-base font-black text-slate-900 mb-0.5">{selectedPayment.salon_name}</p>
+                      <p className="text-xs sm:text-sm font-medium text-slate-600 break-all">{selectedPayment.salon_email}</p>
+                      <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">{selectedPayment.salon_address}</p>
                     </div>
                   </div>
 
-                  <div className="overflow-hidden rounded-xl border border-slate-100 shadow-sm">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="bg-[#1A1A1A] text-white font-bold uppercase tracking-widest text-[10px]">
-                          <th className="px-6 py-4">Description</th>
-                          <th className="px-6 py-4 text-right">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="font-medium">
-                          <td className="px-6 py-5">Subscription / Processing Fee for {selectedPayment.id}</td>
-                          <td className="px-6 py-5 text-right font-bold text-slate-900">MYR {selectedPayment.amount}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="flex justify-end pt-6">
-                    <div className="w-full md:w-72 space-y-3">
-                      <div className="flex justify-between font-medium">
-                        <span className="text-slate-500">Subtotal</span>
-                        <span>RM {selectedPayment.amount}</span>
+                  {/* Description & Amount Breakout */}
+                  <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm mb-6">
+                    <div className="bg-[#1A1A1A] text-white font-bold uppercase tracking-widest text-[10px] px-4 py-3 flex justify-between items-center">
+                      <span>Description</span>
+                      <span className="text-right">Amount</span>
+                    </div>
+                    <div className="p-4 bg-white flex justify-between items-center gap-3 text-xs sm:text-sm font-medium text-slate-900 border-t border-slate-100">
+                      <div className="pr-2 max-w-[65%] sm:max-w-none">
+                        <p className="font-bold text-slate-900 text-xs sm:text-sm">Subscription / Processing Fee</p>
+                        <p className="text-[10px] text-slate-400 font-mono mt-1 break-all">Ref ID: {selectedPayment.id}</p>
                       </div>
-                      <div className="h-px bg-slate-100 my-2" />
-                      <div className="flex justify-between text-lg font-black text-slate-900">
+                      <div className="text-right font-black text-slate-900 text-sm sm:text-base whitespace-nowrap bg-slate-100 px-3 py-1.5 rounded-lg">
+                        MYR {selectedPayment.amount}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Subtotal & Total Summary */}
+                  <div className="flex justify-end pt-2 mb-2">
+                    <div className="w-full sm:w-72 space-y-2.5 bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                      <div className="flex justify-between items-center font-medium text-xs sm:text-sm text-slate-600">
+                        <span>Subtotal</span>
+                        <span className="font-bold text-slate-900">RM {selectedPayment.amount}</span>
+                      </div>
+                      <div className="h-px bg-slate-200 my-1" />
+                      <div className="flex justify-between items-center text-sm sm:text-lg font-black text-slate-900">
                         <span>Total</span>
-                        <span>RM {selectedPayment.amount}</span>
+                        <span className="text-slate-900 font-black">RM {selectedPayment.amount}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-6 bg-slate-50 flex items-center justify-end gap-3 rounded-b-3xl print:hidden">
-                  <Button variant="ghost" onClick={() => setShowDetailDialog(false)} className="rounded-xl font-bold">Close</Button>
-                  <Button variant="outline" onClick={handleDownloadPDF} className="rounded-xl font-bold border-slate-200">
+                {/* Footer Buttons */}
+                <div className="p-4 sm:p-6 bg-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 rounded-b-2xl sm:rounded-b-3xl print:hidden border-t border-slate-200/60">
+                  <Button variant="ghost" onClick={() => setShowDetailDialog(false)} className="rounded-xl font-bold h-11 sm:h-10 text-slate-600 hover:bg-slate-200">Close</Button>
+                  <Button variant="outline" onClick={handleDownloadPDF} className="rounded-xl font-bold border-slate-300 bg-white text-slate-800 h-11 sm:h-10 hover:bg-slate-50">
                     <Download className="w-4 h-4 mr-2" /> Download PDF
                   </Button>
-                  <Button onClick={() => handleSendNotify('whatsapp')} className="bg-accent text-white font-black rounded-xl px-6 shadow-xl shadow-accent/20">
+                  <Button onClick={() => handleSendNotify('whatsapp')} className="bg-accent text-white font-black rounded-xl px-6 h-11 sm:h-10 shadow-lg shadow-accent/20">
                     <Smartphone className="w-4 h-4 mr-2" /> WhatsApp Salon
                   </Button>
                 </div>

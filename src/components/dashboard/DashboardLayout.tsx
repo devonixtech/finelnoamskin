@@ -647,18 +647,46 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <div className="flex items-center gap-3">
               {/* <SalonNotificationSystem onUnreadCountChange={setUnreadCount} /> */}
 
-              <div className="relative h-11 w-11 rounded-xl border-2 border-border/30 hover:border-accent/50 transition-colors cursor-pointer lg:hidden" onClick={() => navigate(`${basePath}/notifications`)}>
-                <Avatar className="h-full w-full">
-                  <AvatarFallback className="bg-accent/10 text-accent text-xs font-bold">
-                    {user?.email ? getInitials(user.email) : "U"}
-                  </AvatarFallback>
-                </Avatar>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-black text-white border-2 border-white animate-pulse shadow-lg">
-                    {unreadCount}
-                  </span>
-                )}
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="relative h-11 w-11 rounded-xl border-2 border-border/30 hover:border-accent/50 transition-colors cursor-pointer lg:hidden">
+                    <Avatar className="h-full w-full">
+                      <AvatarFallback className="bg-accent/10 text-accent text-xs font-bold">
+                        {user?.email ? getInitials(user.email) : "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-black text-white border-2 border-white animate-pulse shadow-lg">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-border lg:hidden">
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate(`${basePath}/profile`)}>
+                    <User className="w-4 h-4 mr-2" />
+                    Profile Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="cursor-pointer text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSignOut}
+                className="lg:hidden text-destructive hover:bg-destructive/10"
+                title="Sign Out"
+              >
+                <LogOut className="w-5 h-5" />
+              </Button>
             </div>
           </div>
         </header>

@@ -64,7 +64,30 @@ const CheckoutPage = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const shippingCost = deliveryMethod === 'ship' ? (cartTotal > 150 ? 0 : 15) : 0;
+    const [platformSettings, setPlatformSettings] = useState({
+        shipping_fee: 15,
+        free_shipping_min: 150
+    });
+
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                const data = await api.admin.getSettings();
+                if (data) {
+                    setPlatformSettings({
+                        shipping_fee: Number(data.shipping_fee ?? 15),
+                        free_shipping_min: Number(data.free_shipping_min ?? 150)
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load checkout settings', e);
+            }
+        };
+        loadSettings();
+    }, []);
+
+    const shippingFeeConfig = platformSettings.shipping_fee;
+    const shippingCost = deliveryMethod === 'ship' ? shippingFeeConfig : 0;
     const taxAmount = cartTotal * TAX_RATE;
     const finalTotal = cartTotal + shippingCost + taxAmount;
 
@@ -74,11 +97,21 @@ const CheckoutPage = () => {
             return;
         }
 
-        // Basic Validation
-        if (!formData.email || !formData.firstName || !formData.lastName || (deliveryMethod === 'ship' && !formData.address)) {
+        // Validation: Contact details required for both Ship and Pickup
+        if (!formData.email || !formData.firstName || !formData.lastName) {
             toast({
                 title: "Missing Information",
-                description: "Please fill in all required contact and shipping details.",
+                description: "Please fill in all required contact details (First Name, Last Name, Email).",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        // Validation: Shipping address required ONLY when deliveryMethod is 'ship'
+        if (deliveryMethod === 'ship' && (!formData.address || !formData.city || !formData.state || !formData.postalCode)) {
+            toast({
+                title: "Missing Information",
+                description: "Please fill in all required shipping address details.",
                 variant: "destructive"
             });
             return;
@@ -228,13 +261,27 @@ const CheckoutPage = () => {
                                 <span className="text-[#1A1A1A]">Checkout</span>
                             </div>
 
-
-
                             {/* Contact Section */}
-                            <section className="mb-10">
+                            <section className="mb-10 space-y-4">
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xl font-bold">Contact</h2>
                                     {!user && <Link to="/login" className="text-sm text-[#1A1A1A] underline underline-offset-4 decoration-1 hover:opacity-60 transition-opacity">Sign in</Link>}
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        name="firstName"
+                                        value={formData.firstName}
+                                        onChange={handleChange}
+                                        placeholder="First name"
+                                        className="h-14 border-slate-200 rounded-lg bg-white/50"
+                                    />
+                                    <Input
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleChange}
+                                        placeholder="Last name"
+                                        className="h-14 border-slate-200 rounded-lg bg-white/50"
+                                    />
                                 </div>
                                 <Input
                                     name="email"
@@ -284,78 +331,70 @@ const CheckoutPage = () => {
                             </section>
 
                             {/* Shipping Address */}
-                            <section className={`space-y-4 transition-all duration-300 ${deliveryMethod === 'ship' ? 'opacity-100' : 'opacity-50 pointer-events-none grayscale'}`}>
-                                <div className="relative group">
-                                    <label className="absolute left-4 top-1 text-[10px] text-slate-400 uppercase font-black tracking-widest leading-none pointer-events-none transition-all">Country/Region</label>
-                                    <select
-                                        name="country"
-                                        value={formData.country}
+                            {deliveryMethod === 'ship' ? (
+                                <section className="space-y-4 transition-all duration-300">
+                                    <h2 className="text-xl font-bold mb-4">Shipping Address</h2>
+                                    <div className="relative group">
+                                        <label className="absolute left-4 top-1 text-[10px] text-slate-400 uppercase font-black tracking-widest leading-none pointer-events-none transition-all">Country/Region</label>
+                                        <select
+                                            name="country"
+                                            value={formData.country}
+                                            onChange={handleChange}
+                                            className="w-full h-14 pl-4 pr-10 pt-4 bg-white/50 border border-slate-200 rounded-lg text-sm appearance-none focus:outline-none focus:border-[#1A1A1A]"
+                                        >
+                                            <option value="Malaysia">Malaysia</option>
+                                            <option value="Singapore">Singapore</option>
+                                            <option value="United States">United States</option>
+                                        </select>
+                                        <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 rotate-90" />
+                                    </div>
+                                    <div className="relative">
+                                        <Input
+                                            name="address"
+                                            value={formData.address}
+                                            onChange={handleChange}
+                                            placeholder="Address"
+                                            className="h-14 pl-4 pr-10 border-slate-200 rounded-lg bg-white/50"
+                                        />
+                                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    </div>
+                                    <Input
+                                        name="apartment"
+                                        value={formData.apartment}
                                         onChange={handleChange}
-                                        className="w-full h-14 pl-4 pr-10 pt-4 bg-white/50 border border-slate-200 rounded-lg text-sm appearance-none focus:outline-none focus:border-[#1A1A1A]"
-                                    >
-                                        <option value="Malaysia">Malaysia</option>
-                                        <option value="Singapore">Singapore</option>
-                                        <option value="United States">United States</option>
-                                    </select>
-                                    <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 rotate-90" />
+                                        placeholder="Apartment, suite, etc. (optional)"
+                                        className="h-14 border-slate-200 rounded-lg bg-white/50"
+                                    />
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <Input
+                                            name="city"
+                                            value={formData.city}
+                                            onChange={handleChange}
+                                            placeholder="City"
+                                            className="h-14 border-slate-200 rounded-lg bg-white/50"
+                                        />
+                                        <Input
+                                            name="state"
+                                            value={formData.state}
+                                            onChange={handleChange}
+                                            placeholder="State"
+                                            className="h-14 border-slate-200 rounded-lg bg-white/50"
+                                        />
+                                        <Input
+                                            name="postalCode"
+                                            value={formData.postalCode}
+                                            onChange={handleChange}
+                                            placeholder="Postcode"
+                                            className="h-14 border-slate-200 rounded-lg bg-white/50"
+                                        />
+                                    </div>
+                                </section>
+                            ) : (
+                                <div className="p-5 border border-slate-200 rounded-xl bg-white/50 text-slate-600 text-sm">
+                                    <p className="font-bold text-[#1A1A1A] mb-1">Store Pick-up Location</p>
+                                    <p>Your order will be prepared for pick up at our main salon location. You will receive an email notification when it is ready (usually within 24 hours).</p>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Input
-                                        name="firstName"
-                                        value={formData.firstName}
-                                        onChange={handleChange}
-                                        placeholder="First name"
-                                        className="h-14 border-slate-200 rounded-lg bg-white/50"
-                                    />
-                                    <Input
-                                        name="lastName"
-                                        value={formData.lastName}
-                                        onChange={handleChange}
-                                        placeholder="Last name"
-                                        className="h-14 border-slate-200 rounded-lg bg-white/50"
-                                    />
-                                </div>
-                                <div className="relative">
-                                    <Input
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleChange}
-                                        placeholder="Address"
-                                        className="h-14 pl-4 pr-10 border-slate-200 rounded-lg bg-white/50"
-                                    />
-                                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                </div>
-                                <Input
-                                    name="apartment"
-                                    value={formData.apartment}
-                                    onChange={handleChange}
-                                    placeholder="Apartment, suite, etc. (optional)"
-                                    className="h-14 border-slate-200 rounded-lg bg-white/50"
-                                />
-                                <div className="grid grid-cols-3 gap-4">
-                                    <Input
-                                        name="city"
-                                        value={formData.city}
-                                        onChange={handleChange}
-                                        placeholder="City"
-                                        className="h-14 border-slate-200 rounded-lg bg-white/50"
-                                    />
-                                    <Input
-                                        name="state"
-                                        value={formData.state}
-                                        onChange={handleChange}
-                                        placeholder="State"
-                                        className="h-14 border-slate-200 rounded-lg bg-white/50"
-                                    />
-                                    <Input
-                                        name="postalCode"
-                                        value={formData.postalCode}
-                                        onChange={handleChange}
-                                        placeholder="Postcode"
-                                        className="h-14 border-slate-200 rounded-lg bg-white/50"
-                                    />
-                                </div>
-                            </section>
+                            )}
 
                             {!showPayment ? (
                                 <Button
@@ -387,7 +426,6 @@ const CheckoutPage = () => {
                     {/* Right Column: Order Summary */}
                     <div className="bg-black/5 lg:border-l border-slate-200 py-12 lg:pl-16 order-1 lg:order-2">
                         <div className="max-w-xl">
-                            {/* Products List */}
                             <div className="space-y-6 mb-10 mr-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
                                 {cart.map(item => (
                                     <div key={item.id} className="flex items-center gap-4">
