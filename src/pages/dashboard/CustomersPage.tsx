@@ -206,22 +206,13 @@ export default function CustomersPage() {
         if (!userId) continue;
 
         if (!customerMap.has(userId)) {
-          let extractedName = booking.full_name;
-          if (!extractedName && booking.notes) {
-            const walkInMatch = booking.notes.match(/(?:Walk-in|Manual Customer):\s*([^|,#\n]+)/);
-            if (walkInMatch && walkInMatch[1].trim() && walkInMatch[1].trim() !== "undefined") {
-              extractedName = walkInMatch[1].trim();
-            }
-          }
-          if (!extractedName) {
-            extractedName = booking.email || "Client #" + userId.slice(0, 4);
-          }
+          const extractedName = booking.customer_name || "Walk-in";
 
           customerMap.set(userId, {
             user_id: userId,
             full_name: extractedName,
-            phone: booking.phone || booking.customer_phone || booking.user_phone || null,
-            email: booking.email || null,
+            phone: booking.customer_phone || null,
+            email: booking.customer_email || null,
             avatar_url: booking.avatar_url || null,
             total_visits: 0,
             total_spent: 0,

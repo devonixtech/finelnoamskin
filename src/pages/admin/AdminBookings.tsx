@@ -223,7 +223,7 @@ export default function AdminBookings() {
                             {booking.user_name?.charAt(0) || 'U'}
                           </div>
                           <div>
-                            <p className="font-black text-slate-900">{booking.user_name || 'Guest User'}</p>
+                            <p className="font-black text-slate-900">{booking.user_name || 'Walk-in'}</p>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{booking.id.slice(0, 8)}</p>
                           </div>
                         </div>

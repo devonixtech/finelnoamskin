@@ -184,7 +184,7 @@ const BillingPage = () => {
         const invoiceNumber = pp?.invoice_number || `L-INV-${String(index + 1).padStart(4, '0')}`;
         const isPaid = booking.status === 'completed';
         const iscash = !isPaid && new Date(booking.booking_date) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const customerName = booking.full_name || booking.notes || 'Guest Customer';
+        const customerName = booking.customer_name || 'Walk-in';
 
         return {
           id: invoiceNumber,
@@ -197,8 +197,8 @@ const BillingPage = () => {
           status: iscash ? 'cash' : isPaid ? 'paid' : 'pending',
           paymentMethod: pp?.payment_method || booking.payment_method || 'Cash',
           time: booking.booking_time || '00:00',
-          customerEmail: pp?.invoice_url ? '' : (booking.email || 'customer@example.com'),
-          customerPhone: booking.phone || '',
+          customerEmail: pp?.invoice_url ? '' : (booking.customer_email || ''),
+          customerPhone: booking.customer_phone || '',
           discount: Number(booking.discount_amount || 0),
           subtotal: Number(booking.service_price || booking.price || 0),
           coinsUsed: Number(booking.coins_used || 0),

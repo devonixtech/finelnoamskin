@@ -312,7 +312,7 @@ export default function AdminPaymentsEnhanced() {
                     <div className="bg-slate-50/60 p-4 rounded-xl border border-slate-100/80">
                       <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-1.5">From</p>
                       <p className="text-base font-black text-slate-900 mb-0.5">Noamskin</p>
-                      <p className="text-xs sm:text-sm font-medium text-slate-600">hello@noamskin.com</p>
+                      <p className="text-xs sm:text-sm font-medium text-slate-600">noamskin@gmail.com</p>
                     </div>
                     <div className="bg-slate-50/60 p-4 rounded-xl border border-slate-100/80">
                       <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-1.5">Bill to</p>

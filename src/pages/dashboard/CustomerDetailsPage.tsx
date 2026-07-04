@@ -453,7 +453,6 @@ export default function CustomerDetailsPage() {
     };
 
     const handleSaveTreatment = async () => {
-        if (!selectedBooking) return;
         setSavingTreatment(true);
         try {
             // Save Profile Data (DOB & Skin Type)
@@ -961,7 +960,7 @@ export default function CustomerDetailsPage() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            {Object.keys(treatmentData).filter(k => k !== 'service_name_manual' && k !== 'record_date').map(key => (
+                            {Object.keys(treatmentData).filter(k => k !== 'service_name_manual' && k !== 'record_date' && k !== 'follow_up_reminder_date').map(key => (
                                 <div key={key} className={key.includes('notes') || key.includes('instructions') || key.includes('details') ? 'col-span-2' : ''}>
                                     <Label className="uppercase text-[10px] font-black text-white/50 mb-1 block">{key.replace(/_/g, ' ')}</Label>
                                     <Textarea
@@ -971,6 +970,15 @@ export default function CustomerDetailsPage() {
                                     />
                                 </div>
                             ))}
+                            <div>
+                                <Label className="uppercase text-[10px] font-black text-white/50 mb-1 block">Follow Up Reminder Date</Label>
+                                <Input
+                                    type="date"
+                                    value={treatmentData.follow_up_reminder_date}
+                                    onChange={(e) => setTreatmentData({ ...treatmentData, follow_up_reminder_date: e.target.value })}
+                                    className="bg-muted/50 border-border"
+                                />
+                            </div>
                         </div>
 
                         {/* Photo Comparison Section */}

@@ -330,7 +330,8 @@ const BookAppointment = () => {
 
         // We use the first booking ID as reference, or join them
         const referenceId = bookingIds.join(',');
-        const response = await api.toyyibpay.createBill({ booking_id: referenceId, payment_type: paymentOption });
+        const depositAmount = paymentOption === 'deposit' && finalPrice > 100 ? 100 : finalPrice;
+        const response = await api.toyyibpay.createBill({ booking_id: referenceId, payment_type: paymentOption, amount: depositAmount });
 
         if (response?.payment_url) {
           window.location.href = response.payment_url;

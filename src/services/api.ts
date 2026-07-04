@@ -189,6 +189,9 @@ const normalizeBooking = (booking: any) => {
         booking_time: typeof booking.booking_time === 'string'
             ? booking.booking_time
             : (booking.booking_time ? String(booking.booking_time) : ''),
+        customer_name: (booking.user?.profile?.full_name || booking.full_name || (booking.notes?.match(/\[GUEST:\s*(.*?)\s*\|/)?.[1]) || booking.notes?.replace(/\[GUEST:.*?\]/g, '') || '').trim(),
+        customer_phone: (booking.user?.profile?.phone || booking.phone || (booking.notes?.match(/\|\s*(.*?)\s*\]/)?.[1]) || '').trim(),
+        customer_email: (booking.user?.email || booking.email || '').trim(),
     };
 };
 
@@ -1034,7 +1037,7 @@ export const api = {
         },
     },
     toyyibpay: {
-        createBill: (data: { booking_id: string; payment_type?: 'full' | 'deposit' }) =>
+        createBill: (data: { booking_id: string; payment_type?: 'full' | 'deposit'; amount?: number }) =>
             fetchWithAuth('/toyyibpay/create-bill', {
                 method: 'POST',
                 body: JSON.stringify(data),
