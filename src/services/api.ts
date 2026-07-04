@@ -169,11 +169,15 @@ const normalizeBooking = (booking: any) => {
     const salon = booking.salon || {};
     const staff = booking.staff || {};
 
+    const servicePrice = Number(service.price || 0);
+    const pricePaid = Number(booking.price_paid || 0);
+
     return {
         ...booking,
         service_name: booking.service_name || service.name || booking.service?.title || 'Service',
-        price: booking.price ?? booking.price_paid ?? service.price ?? 0,
-        service_price: service.price || 0,
+        price: servicePrice || pricePaid,
+        amount_paid: pricePaid,
+        service_price: servicePrice,
         duration_minutes: booking.duration_minutes ?? service.duration_minutes ?? 0,
         category: booking.category || service.category || null,
         image_url: booking.image_url || service.image_url || null,

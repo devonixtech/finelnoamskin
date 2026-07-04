@@ -280,9 +280,10 @@ export default function AppointmentsPage() {
             full_name: b.full_name,
             phone: b.phone
           } : undefined,
-          user_name: b.full_name,
+          user_name: b.full_name || null,
           user_phone: b.phone,
-          user_type: b.user_type
+          user_type: b.user_type,
+          amount_paid: Number(b.amount_paid || b.price_paid || 0),
         };
       });
 
@@ -872,11 +873,15 @@ export default function AppointmentsPage() {
                                 return "Online service booking";
                               }
 
-                              if (booking.user_name && (booking.user_id === user?.id || booking.user_name === user?.full_name)) {
-                                return "Walk-in Customer";
+                              if (booking.customer?.full_name) {
+                                return booking.customer.full_name;
                               }
 
-                              return booking.user_name || "Walk-in Customer";
+                              if (booking.user_name && booking.user_name !== user?.full_name) {
+                                return booking.user_name;
+                              }
+
+                              return "Guest Customer";
                             })()}
                             {booking.isReturning ? (
                               <Badge className="bg-blue-500/10 text-blue-400 border-none font-black text-[8px] uppercase tracking-widest px-1.5 h-4">Returning</Badge>
@@ -929,7 +934,11 @@ export default function AppointmentsPage() {
                             )}
                             MYR {Number(booking.price || 0).toFixed(2)}
                           </p>
-                          {(Number(booking.price || 0) > Number(booking.amount_paid || 0)) ? (
+                          {booking.status === 'completed' || booking.status === 'cancelled' ? (
+                             <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500/80 mt-1 flex justify-end">
+                               {booking.status === 'cancelled' ? 'Cancelled' : 'Fully Paid'}
+                             </p>
+                          ) : (Number(booking.price || 0) > Number(booking.amount_paid || 0)) ? (
                              <p className="text-xs font-bold uppercase tracking-widest text-rose-500 mt-1 flex justify-end">
                                Remaining: MYR {(Number(booking.price || 0) - Number(booking.amount_paid || 0)).toFixed(2)}
                              </p>
