@@ -49,6 +49,7 @@ import {
   Scissors
 } from "lucide-react";
 import { format } from "date-fns";
+import logo from "@/assets/logo.png";
 
 interface Invoice {
   id: string;
@@ -69,6 +70,7 @@ interface Invoice {
   loyaltyPointsUsed: number;
   coinValue: number;
   type: 'appointment' | 'product';
+  invoiceUrl?: string;
 }
 
 interface PaymentStats {
@@ -82,6 +84,7 @@ interface PaymentStats {
 }
 
 const BillingPage = () => {
+  const ownerEmail = "noamskin@gmail.com";
   const [activeTab, setActiveTab] = useState("invoices");
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -138,7 +141,7 @@ const BillingPage = () => {
     }, 300);
   };
 
-  const handleSendNotify = (type: 'sms' | 'whatsapp') => {
+  const handleSendNotify = async (type: 'sms' | 'whatsapp') => {
     if (!selectedInvoice) return;
 
     const phone = selectedInvoice.customerPhone || "";
@@ -153,7 +156,29 @@ const BillingPage = () => {
       return;
     }
 
-    const message = `Hello ${selectedInvoice.customer}, your invoice for ${selectedInvoice.service} at ${currentSalon?.name} is ready. Total: MYR ${selectedInvoice.amount}.`;
+    // Failsafe: if the invoice doesn't have a Cloudinary link in the invoice URL,
+    // fetch/generate it on-the-fly from the backend!
+    let invoiceLink = selectedInvoice.invoiceUrl || "";
+    if (!invoiceLink || !invoiceLink.includes('cloudinary')) {
+      try {
+        const res = await api.bookings.getInvoice(selectedInvoice.bookingId);
+        if (res?.invoice?.pdfUrl) {
+          invoiceLink = res.invoice.pdfUrl;
+          // Update local state to cache the generated URL
+          setSelectedInvoice(prev => prev ? { ...prev, invoiceUrl: res.invoice.pdfUrl } : null);
+          setInvoices(prev => prev.map(inv => inv.bookingId === selectedInvoice.bookingId ? { ...inv, invoiceUrl: res.invoice.pdfUrl } : inv));
+        }
+      } catch (err) {
+        console.error("Failed to generate/fetch Cloudinary link on click:", err);
+      }
+    }
+
+    // Fallback if no Cloudinary link could be retrieved
+    if (!invoiceLink || !invoiceLink.includes('cloudinary')) {
+      invoiceLink = `${window.location.origin}/invoices/${selectedInvoice.bookingId}`;
+    }
+
+    const message = `Hello ${selectedInvoice.customer}, your invoice for ${selectedInvoice.service} at ${currentSalon?.name} is ready. Total: MYR ${selectedInvoice.amount.toFixed(2)}. View invoice: ${invoiceLink}`;
 
     const encodedMsg = encodeURIComponent(message);
     const url = type === 'whatsapp'
@@ -205,6 +230,7 @@ const BillingPage = () => {
           loyaltyPointsUsed: Number(booking.loyalty_points_used || 0),
           coinValue: Number(booking.coin_currency_value || 0) * (Number(booking.coins_used || 0) + Number(booking.loyalty_points_used || 0)),
           type: 'appointment',
+          invoiceUrl: pp?.invoice_url || `${window.location.origin}/invoices/${booking.id}`,
         };
       });
 
@@ -430,52 +456,44 @@ const BillingPage = () => {
           </CardContent>
         </Card>
 
-        {/* Invoice Detail Dialog */}
         <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-none bg-card rounded-3xl shadow-2xl border border-border/50">
+          <DialogContent className="w-[calc(100%-2rem)] md:w-full max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-none bg-white rounded-3xl shadow-2xl border border-slate-200">
             {selectedInvoice && (
               <div className="flex flex-col">
-                <div className="p-8 md:p-12 space-y-12 text-sm text-foreground/80 print:text-slate-900 print-only">
+                <div className="p-4 md:p-12 space-y-8 md:space-y-12 text-sm text-slate-700 print:text-slate-900 print-only">
                   {/* Row 1: Logo and Title */}
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
-                      {currentSalon?.logo_url ? (
-                        <img src={currentSalon.logo_url} className="w-24 h-auto object-contain" alt="Logo" />
-                      ) : (
-                        <div className="relative flex items-center justify-center w-16 h-16">
-                          <span className="text-5xl font-black text-[#0066FF] leading-none">S</span>
-                          <span className="text-5xl font-black text-[#0066FF] leading-none -ml-3 transform skew-x-[15deg] border-l-4 border-white pl-1">A</span>
-                        </div>
-                      )}
+                      <img src={logo} alt="Noamskin Logo" className="h-8 sm:h-10 w-auto object-contain object-left" />
                     </div>
                     <div className="text-right">
-                      <div className="space-y-1 text-muted-foreground print:text-slate-500 font-medium text-sm">
-                        <p>Invoice no: <span className="text-foreground print:text-slate-900">{selectedInvoice.id.replace('L-INV-', '')}</span></p>
-                        <p>Invoice date: <span className="text-foreground print:text-slate-900">{format(new Date(selectedInvoice.date), "MMM d, yyyy")}</span></p>
+                      <div className="space-y-1 text-slate-500 print:text-slate-500 font-medium text-sm">
+                        <p>Invoice no: <span className="text-slate-900 print:text-slate-900">{selectedInvoice.id.replace('L-INV-', '')}</span></p>
+                        <p>Invoice date: <span className="text-slate-900 print:text-slate-900">{format(new Date(selectedInvoice.date), "MMM d, yyyy")}</span></p>
                       </div>
                     </div>
                   </div>
 
                   {/* Row 2: Addresses */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 print:grid-cols-3 gap-8">
-                    <div className="space-y-3 border-l-4 border-border/10 print:border-slate-100 pl-4">
-                      <p className="font-bold text-muted-foreground/60 print:text-slate-400 uppercase tracking-widest text-[10px]">From</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 print:grid-cols-3 gap-6 md:gap-8">
+                    <div className="space-y-3 border-l-4 border-slate-200 print:border-slate-100 pl-4">
+                      <p className="font-bold text-slate-400 print:text-slate-400 uppercase tracking-widest text-[10px]">From</p>
                       <div>
-                        <p className="text-lg font-black text-foreground print:text-slate-900 mb-1">{currentSalon?.name || "Salon Name"}</p>
-                        <p className="font-medium text-foreground/90 print:text-slate-700">{currentSalon?.email}</p>
-                        <p className="font-medium text-muted-foreground print:text-slate-500">{currentSalon?.address || "No Address Provided"}</p>
-                        <p className="font-medium text-muted-foreground print:text-slate-500">{currentSalon?.phone}</p>
+                        <p className="text-lg font-black text-slate-900 print:text-slate-900 mb-1">{currentSalon?.name || "Salon Name"}</p>
+                        <p className="font-medium text-slate-800 print:text-slate-700">{ownerEmail}</p>
+                        <p className="font-medium text-slate-500 print:text-slate-500">{currentSalon?.address || "No Address Provided"}</p>
+                        <p className="font-medium text-slate-500 print:text-slate-500">{currentSalon?.phone}</p>
                       </div>
                     </div>
-                    <div className="space-y-3 border-l-4 border-border/10 print:border-slate-100 pl-4">
-                      <p className="font-bold text-muted-foreground/60 print:text-slate-400 uppercase tracking-widest text-[10px]">Bill to</p>
+                    <div className="space-y-3 border-l-4 border-slate-200 print:border-slate-100 pl-4">
+                      <p className="font-bold text-slate-400 print:text-slate-400 uppercase tracking-widest text-[10px]">Bill to</p>
                       <div>
-                        <p className="text-lg font-black text-foreground print:text-slate-900 mb-1">{selectedInvoice.customer}</p>
-                        <p className="font-medium text-muted-foreground print:text-slate-500">{selectedInvoice.customerPhone}</p>
+                        <p className="text-lg font-black text-slate-900 print:text-slate-900 mb-1">{selectedInvoice.customer}</p>
+                        <p className="font-medium text-slate-500 print:text-slate-500">{selectedInvoice.customerPhone}</p>
                       </div>
                     </div>
                     {selectedInvoice.type === 'product' && (
-                      <div className="space-y-3 border-l-4 border-slate-50 pl-4">
+                      <div className="space-y-3 border-l-4 border-slate-100 pl-4">
                         <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px]">Ship to</p>
                         <div>
                           <p className="font-medium text-slate-500 italic">Deliverables same as billing address.</p>
@@ -485,29 +503,34 @@ const BillingPage = () => {
                   </div>
 
                   {/* Table */}
-                  <div className="overflow-hidden rounded-xl border border-slate-100">
+                  <div className="overflow-hidden rounded-xl border border-slate-200">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-[#0066FF] text-white font-bold uppercase tracking-widest text-[10px]">
-                          <th className="px-6 py-4">Description</th>
-                          <th className="px-6 py-4 text-center">Rate</th>
-                          <th className="px-6 py-4 text-center">Qty</th>
-                          <th className="px-6 py-4 text-center">Tax</th>
-                          <th className="px-6 py-4 text-center">Disc</th>
-                          <th className="px-6 py-4 text-right">Amount</th>
+                          <th className="px-4 md:px-6 py-4">Description</th>
+                          <th className="px-4 md:px-6 py-4 text-center hidden md:table-cell">Rate</th>
+                          <th className="px-4 md:px-6 py-4 text-center hidden md:table-cell">Qty</th>
+                          <th className="px-4 md:px-6 py-4 text-center hidden md:table-cell">Tax</th>
+                          <th className="px-4 md:px-6 py-4 text-center hidden md:table-cell">Disc</th>
+                          <th className="px-4 md:px-6 py-4 text-right">Amount</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="font-medium border-b border-slate-50">
-                          <td className="px-6 py-5">
-                            <p className="text-foreground print:text-slate-900 font-bold">{selectedInvoice.service}</p>
-                            <p className="text-muted-foreground print:text-slate-500 text-xs mt-1">Professional salon services provided by our staff.</p>
+                        <tr className="font-medium border-b border-slate-100">
+                          <td className="px-4 md:px-6 py-5">
+                            <p className="text-slate-900 print:text-slate-900 font-bold">{selectedInvoice.service}</p>
+                            <p className="text-slate-500 print:text-slate-500 text-xs mt-1 hidden md:block">Professional salon services provided by our staff.</p>
+                            {/* On mobile, show summary details inline */}
+                            <div className="text-[10px] text-slate-500 mt-1 md:hidden space-y-0.5">
+                              <p>Rate: MYR {selectedInvoice.subtotal} • Qty: 1</p>
+                              {selectedInvoice.discount > 0 && <p className="text-amber-600">Discount: - MYR {selectedInvoice.discount}</p>}
+                            </div>
                           </td>
-                          <td className="px-6 py-5 text-center text-foreground/90 print:text-slate-700">MYR {selectedInvoice.subtotal}</td>
-                          <td className="px-6 py-5 text-center text-foreground/90 print:text-slate-700">1</td>
-                          <td className="px-6 py-5 text-center text-foreground/90 print:text-slate-700">0%</td>
-                          <td className="px-6 py-5 text-center text-foreground/90 print:text-slate-700">MYR {selectedInvoice.discount}</td>
-                          <td className="px-6 py-5 text-right font-bold text-foreground print:text-slate-900">MYR {selectedInvoice.amount}</td>
+                          <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">MYR {selectedInvoice.subtotal}</td>
+                          <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">1</td>
+                          <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">0%</td>
+                          <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">MYR {selectedInvoice.discount}</td>
+                          <td className="px-4 md:px-6 py-5 text-right font-bold text-slate-900 print:text-slate-900">MYR {selectedInvoice.amount}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -517,18 +540,19 @@ const BillingPage = () => {
                   <div className="flex flex-col md:flex-row justify-between pt-6">
                     <div className="space-y-8 max-w-sm">
                       <div className="space-y-2">
-                        <p className="font-bold text-foreground print:text-slate-900">Payment instruction</p>
-                        <div className="text-muted-foreground print:text-slate-500 space-y-1">
-                          <p>UPI/Paypal: <span className="font-bold text-foreground/90 print:text-slate-700">{currentSalon?.upi_id || "pay@example.com"}</span></p>
-                          <p>Bank: <span className="font-bold text-foreground/90 print:text-slate-700">{currentSalon?.bank_details || "No Bank Info"}</span></p>
+                        <p className="font-bold text-slate-900 print:text-slate-900">Payment Instructions</p>
+                        <div className="text-slate-500 print:text-slate-500 space-y-1 text-sm">
+                          <p>Bank Name: <span className="font-bold text-slate-800 print:text-slate-700">Alliance Bank</span></p>
+                          <p>Account Name: <span className="font-bold text-slate-800 print:text-slate-700">Noam Skin Enterprise</span></p>
+                          <p>Account No: <span className="font-bold text-slate-800 print:text-slate-700">140730013008888</span></p>
                         </div>
                       </div>
                     </div>
 
                     <div className="w-full md:w-72 space-y-3 mt-8 md:mt-0">
                       <div className="flex justify-between font-medium">
-                        <span className="text-muted-foreground print:text-slate-500">Subtotal</span>
-                        <span className="text-foreground/90 print:text-slate-700">MYR {selectedInvoice.subtotal.toFixed(2)}</span>
+                        <span className="text-slate-500 print:text-slate-500">Subtotal</span>
+                        <span className="text-slate-800 print:text-slate-700">MYR {selectedInvoice.subtotal.toFixed(2)}</span>
                       </div>
                       {selectedInvoice.discount > 0 && (
                         <div className="flex justify-between font-medium text-amber-600">
@@ -547,12 +571,12 @@ const BillingPage = () => {
                           <span>- MYR {selectedInvoice.coinValue.toFixed(2)}</span>
                         </div>
                       )}
-                      <div className="h-px bg-border/50 print:bg-slate-100 my-2" />
-                      <div className="flex justify-between text-lg font-black text-foreground print:text-slate-900">
+                      <div className="h-px bg-slate-200 print:bg-slate-100 my-2" />
+                      <div className="flex justify-between text-lg font-black text-slate-900 print:text-slate-900">
                         <span>Total Paid</span>
                         <span className="print:text-slate-900">MYR {selectedInvoice.amount.toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between font-medium text-emerald-500 print:text-emerald-700">
+                      <div className="flex justify-between font-medium text-emerald-600 print:text-emerald-700">
                         <span>Amount Settled</span>
                         <span className="print:text-emerald-700">- MYR {selectedInvoice.status === 'paid' ? selectedInvoice.amount.toFixed(2) : '0.00'}</span>
                       </div>
@@ -561,14 +585,14 @@ const BillingPage = () => {
                 </div>
 
                 {/* Modal Footer */}
-                <div className="p-6 bg-muted/20 border-t border-border/50 flex items-center justify-end gap-3 rounded-b-3xl print:hidden">
-                  <Button variant="ghost" onClick={() => setShowDetailDialog(false)} className="rounded-xl font-bold hover:bg-muted transition-all">
+                <div className="p-4 md:p-6 bg-slate-50 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 md:gap-3 rounded-b-3xl print:hidden">
+                  <Button variant="ghost" onClick={() => setShowDetailDialog(false)} className="rounded-xl font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all h-12 sm:h-10">
                     Close
                   </Button>
-                  <Button variant="outline" onClick={handleDownloadPDF} className="rounded-xl font-bold bg-muted/30 border-border hover:bg-muted transition-all">
+                  <Button variant="outline" onClick={handleDownloadPDF} className="rounded-xl font-bold bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-all h-12 sm:h-10">
                     <Download className="w-4 h-4 mr-2" /> Download PDF
                   </Button>
-                  <Button onClick={() => handleSendNotify('whatsapp')} className="bg-accent hover:bg-accent/90 text-white font-black rounded-xl px-6 min-w-32 shadow-xl shadow-accent/20 transition-all">
+                  <Button onClick={() => handleSendNotify('whatsapp')} className="bg-[#0066FF] hover:bg-[#0055DD] text-white font-black rounded-xl px-6 shadow-xl shadow-[#0066FF]/20 transition-all h-12 sm:h-10">
                     <Smartphone className="w-4 h-4 mr-2" /> SMS/WhatsApp
                   </Button>
                 </div>
@@ -628,14 +652,7 @@ const BillingPage = () => {
               {/* Logo and Title */}
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
-                  {currentSalon?.logo_url ? (
-                    <img src={currentSalon.logo_url} className="w-24 h-auto object-contain" alt="Logo" />
-                  ) : (
-                    <div className="relative flex items-center justify-center w-16 h-16">
-                      <span className="text-5xl font-black text-[#0066FF] leading-none">S</span>
-                      <span className="text-5xl font-black text-[#0066FF] leading-none -ml-3 transform skew-x-[15deg] border-l-4 border-white pl-1">A</span>
-                    </div>
-                  )}
+                  <img src={logo} alt="Noamskin Logo" className="h-8 sm:h-10 w-auto object-contain object-left" />
                 </div>
                 <div className="text-right">
                   <h2 className="text-3xl font-black text-slate-900 mb-4 uppercase tracking-tighter">Tax Invoice</h2>
@@ -652,7 +669,7 @@ const BillingPage = () => {
                   <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px]">From</p>
                   <div>
                     <p className="text-lg font-black text-slate-900 mb-1">{currentSalon?.name || "Salon Name"}</p>
-                    <p className="font-medium text-slate-700">{currentSalon?.email}</p>
+                    <p className="font-medium text-slate-700">{ownerEmail}</p>
                     <p className="font-medium text-slate-500">{currentSalon?.address || "No Address Provided"}</p>
                     <p className="font-medium text-slate-500">{currentSalon?.phone}</p>
                   </div>
@@ -706,10 +723,11 @@ const BillingPage = () => {
               {/* Footer Summary */}
               <div className="flex justify-between items-start pt-6 border-t border-slate-100">
                 <div className="space-y-4">
-                  <p className="font-bold text-slate-900">Payment instruction</p>
-                  <div className="text-slate-500 space-y-1">
-                    <p>UPI/Paypal: <span className="font-bold text-slate-700">{currentSalon?.upi_id || "pay@example.com"}</span></p>
-                    <p>Bank: <span className="font-bold text-slate-700">{currentSalon?.bank_details || "No Bank Info"}</span></p>
+                  <p className="font-bold text-slate-900">Payment Instructions</p>
+                  <div className="text-slate-500 space-y-1 text-sm">
+                    <p>Bank Name: <span className="font-bold text-slate-700">Alliance Bank</span></p>
+                    <p>Account Name: <span className="font-bold text-slate-700">Noam Skin Enterprise</span></p>
+                    <p>Account No: <span className="font-bold text-slate-700">140730013008888</span></p>
                   </div>
                 </div>
                 <div className="w-72 space-y-3">

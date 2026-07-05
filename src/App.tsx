@@ -81,6 +81,8 @@ const CartPage = React.lazy(() => import("./pages/CartPage"));
 const CheckoutPage = React.lazy(() => import("./pages/CheckoutPage"));
 const TestEmail = React.lazy(() => import("./pages/TestEmail"));
 const MembershipDetailsPage = React.lazy(() => import("./pages/MembershipDetailsPage"));
+const PublicInvoicePage = React.lazy(() => import("./pages/PublicInvoicePage"));
+
 
 const queryClient = new QueryClient();
 
@@ -148,6 +150,7 @@ const App = () => {
                           <Route path="/contact" element={<ContactUs />} />
                           <Route path="/test-email" element={<TestEmail />} />
                           <Route path="/payment-success" element={<PaymentSuccess />} />
+                          <Route path="/invoices/:id" element={<PublicInvoicePage />} />
 
                           {/* USER (Customer) Routes */}
                           <Route path="/user/dashboard" element={

@@ -837,7 +837,21 @@ export default function AppointmentsPage() {
                 </Button>
               </Card>
             ) : (
-              filteredBookings.map((booking) => (
+              filteredBookings.map((booking) => {
+                const getDisplayName = () => {
+                  const walkInMatch = booking.notes?.match(/Walk-in:\s*([^|#\n]+)/);
+                  if (walkInMatch && walkInMatch[1].trim() && walkInMatch[1].trim() !== "undefined") return walkInMatch[1].trim();
+                  if (booking.full_name) return booking.full_name;
+                  if (booking.user?.profile?.full_name) return booking.user.profile.full_name;
+                  if (booking.customer?.full_name) return booking.customer.full_name;
+                  if (booking.user_name && booking.user_name !== user?.full_name) return booking.user_name;
+                  if (booking.user?.email) return booking.user.email.split('@')[0];
+                  if (booking.user_type === 'customer') return "Online Customer";
+                  return "Guest Customer";
+                };
+                const displayName = getDisplayName();
+                
+                return (
                 <Card
                   key={booking.id}
                   className="group border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-card overflow-hidden rounded-2xl"
@@ -858,31 +872,12 @@ export default function AppointmentsPage() {
                         <Avatar className="w-12 h-12 border-2 border-white shadow-sm ring-2 ring-accent/5">
                           <AvatarImage src="" />
                           <AvatarFallback className="bg-gradient-to-br from-accent/20 to-accent/10 text-accent font-black">
-                            {(booking.user_name || "W").charAt(0).toUpperCase()}
+                            {displayName.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="space-y-1">
                           <h4 className="text-lg font-black text-white flex items-center gap-2">
-                            {(() => {
-                              const walkInMatch = booking.notes?.match(/Walk-in:\s*([^|#\n]+)/);
-                              if (walkInMatch && walkInMatch[1].trim() && walkInMatch[1].trim() !== "undefined") {
-                                return walkInMatch[1].trim();
-                              }
-
-                              if (booking.user_type === 'customer') {
-                                return "Online service booking";
-                              }
-
-                              if (booking.customer?.full_name) {
-                                return booking.customer.full_name;
-                              }
-
-                              if (booking.user_name && booking.user_name !== user?.full_name) {
-                                return booking.user_name;
-                              }
-
-                              return "Guest Customer";
-                            })()}
+                            {displayName}
                             {booking.isReturning ? (
                               <Badge className="bg-blue-500/10 text-blue-400 border-none font-black text-[8px] uppercase tracking-widest px-1.5 h-4">Returning</Badge>
                             ) : (
@@ -1039,7 +1034,8 @@ export default function AppointmentsPage() {
                     </CardContent>
                   </div>
                 </Card>
-              ))
+              );
+              })
             )}
           </div>
         )}

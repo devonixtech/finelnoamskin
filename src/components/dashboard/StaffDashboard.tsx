@@ -243,12 +243,12 @@ export function StaffDashboard() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-1">
                     <h1 className="text-4xl font-black text-foreground tracking-tight">
-                        Hello, {staffInfo?.display_name?.split(' ')?.[0] || 'Staff'} ðŸ‘‹
+                        Hello, {staffInfo?.display_name?.split(' ')?.[0] || 'Staff'} 👋
                     </h1>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
                         {isClockedIn && currentSession?.check_in
-                            ? `Duty Active â€¢ Started ${format(parseISO(currentSession.check_in.replace(' ', 'T')), "h:mm a")}`
-                            : "Shift Pending â€¢ System Ready"}
+                            ? `Duty Active • Started ${format(parseISO(currentSession.check_in.replace(' ', 'T')), "h:mm a")}`
+                            : "Shift Pending • System Ready"}
                     </p>
                 </div>
 
@@ -550,7 +550,7 @@ export function StaffDashboard() {
                             <div className="space-y-2">
                                 <h4 className="text-lg font-black tracking-tight">Deployment Ready</h4>
                                 <p className="text-[10px] font-bold text-white/50 leading-relaxed uppercase tracking-widest">
-                                    Last Sync: {format(lastSync, "h:mm:ss a")} â€¢ System Optimized
+                                    Last Sync: {format(lastSync, "h:mm:ss a")} • System Optimized
                                 </p>
                             </div>
                             <Button

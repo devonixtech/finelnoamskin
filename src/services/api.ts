@@ -302,7 +302,15 @@ export const servicesAPI = {
 // Bookings API
 export const bookingsAPI = {
     async getAll(filters?: { user_id?: string; salon_id?: string; staff_id?: string; status?: string; date?: string; start_date?: string; end_date?: string; limit?: number; offset?: number }) {
-        const params = new URLSearchParams(filters as any);
+        const validFilters: any = {};
+        if (filters) {
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== undefined && value !== null && value !== '') {
+                    validFilters[key] = value;
+                }
+            });
+        }
+        const params = new URLSearchParams(validFilters);
         const data = await fetchWithAuth(`/bookings?${params}`);
         return toArray(data, 'bookings').map(normalizeBooking);
     },
@@ -359,6 +367,10 @@ export const bookingsAPI = {
             method: 'PUT',
             body: JSON.stringify({ rating, comment }),
         });
+    },
+
+    async getInvoice(bookingId: string) {
+        return await fetchWithAuth(`/bookings/${bookingId}/invoice`);
     }
 };
 
@@ -638,6 +650,11 @@ export const profilesAPI = {
 
 // Staff Profiles API
 export const staffProfilesAPI = {
+    async getMe(salonId: string) {
+        const data = await fetchWithAuth(`/staff/me/dashboard-data?salon_id=${salonId}`);
+        return data?.staff || null;
+    },
+
     async getBySalon(salonId: string) {
         const data = await fetchWithAuth(`/staff?salon_id=${salonId}`);
         return toArray(data, 'staff');
@@ -715,10 +732,7 @@ export const staffProfilesAPI = {
         return toArray(data, 'attendance');
     },
 
-    async getMe(salonId: string) {
-        const data = await fetchWithAuth(`/staff/me?salon_id=${salonId}`);
-        return data?.staff || data;
-    },
+
 
     async syncServices(id: string, serviceIds: string[]) {
         return await fetchWithAuth(`/staff/${id}/services`, {
@@ -993,14 +1007,14 @@ export const api = {
     },
     productPurchases: {
         getByCustomer: async (userId: string, salonId: string) => {
-            const data = await fetchWithAuth(`/product_purchases?user_id=${userId}&salon_id=${salonId}`);
+            const data = await fetchWithAuth(`/customer_purchases?user_id=${userId}&salon_id=${salonId}`);
             return toArray(data, 'purchases');
         },
-        create: (data: { user_id: string; salon_id: string; product_name: string; price: number; purchase_date?: string }) =>
-            fetchWithAuth('/product_purchases', {
+        create: (data: { user_id: string; salon_id: string; product_name: string; price: number; purchase_date?: string; inventory_id?: string }) => 
+            fetchWithAuth('/customer_purchases', {
                 method: 'POST',
-                body: JSON.stringify(data),
-            }),
+                body: JSON.stringify(data)
+            })
     },
     loyalty: {
         getSettings: (salonId: string) => fetchWithAuth(`/loyalty/settings?salon_id=${salonId}`),

@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Shield, Lock, User, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
-import api from "@/services/api";
 
 export default function SimpleAdminAccess() {
   const [searchParams] = useSearchParams();
@@ -24,12 +23,23 @@ export default function SimpleAdminAccess() {
       const userType = user.user_type;
       const salonRole = user.salon_role;
 
-      if (userType === 'admin') {
-        navigate("/admin");
+      if (userType === 'admin' || userType === 'super_admin') {
+        toast({ title: "Welcome Super Admin!", description: "Redirecting to admin dashboard..." });
+        navigate("/super-admin/dashboard");
       } else if (userType === 'salon_owner' || (salonRole && ['owner', 'manager'].includes(salonRole))) {
+        toast({ title: "Welcome!", description: "Redirecting to salon dashboard..." });
         navigate("/salon/dashboard");
       } else if (salonRole === 'staff') {
+        toast({ title: "Welcome!", description: "Redirecting to staff dashboard..." });
         navigate("/staff/dashboard");
+      } else if (userType === 'customer') {
+        // Customer shouldn't be here - sign them out
+        toast({
+          title: "Access Denied",
+          description: "Only administrators and salon partners are allowed here.",
+          variant: "destructive",
+        });
+        signOut();
       }
     }
   }, [user, authLoading, navigate]);
@@ -40,40 +50,10 @@ export default function SimpleAdminAccess() {
 
     try {
       console.log('Attempting admin/partner login...');
+      // login() calls fetchUser() internally which updates user state
+      // The useEffect above will watch for user state and redirect automatically
       await login(email.trim(), password);
-
-      // Get user type and redirect accordingly
-      const userData = await api.auth.getCurrentUser();
-      const userType = userData?.user?.user_type;
-      const salonRole = userData?.user?.salon_role;
-
-      if (userType === 'admin') {
-        toast({
-          title: "Welcome Super Admin!",
-          description: "Redirecting to admin dashboard...",
-        });
-        navigate("/admin");
-      } else if (userType === 'salon_owner' || (salonRole && ['owner', 'manager'].includes(salonRole))) {
-        toast({
-          title: "Welcome Salon Owner/Manager!",
-          description: "Redirecting to salon dashboard...",
-        });
-        navigate("/salon/dashboard");
-      } else if (salonRole === 'staff') {
-        toast({
-          title: "Welcome Staff!",
-          description: "Redirecting to staff dashboard...",
-        });
-        navigate("/staff/dashboard");
-      } else {
-        toast({
-          title: "Access Denied",
-          description: "Only administrators and salon partners are allowed here. Customers please use the website login.",
-          variant: "destructive",
-        });
-        await signOut();
-      }
-
+      // Do NOT navigate here — let the useEffect handle redirect after user state is set
     } catch (error: any) {
       console.error('Login error:', error);
       toast({

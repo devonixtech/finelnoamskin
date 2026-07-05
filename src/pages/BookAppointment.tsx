@@ -362,6 +362,7 @@ const BookAppointment = () => {
     const coinDiscount = calculateCoinDiscount();
     const finalPriceTotal = Math.max(0, subtotal - couponDiscount - coinDiscount);
 
+    const isPayingNow = calculateTotal() > 0;
     const bookingPayload = {
       user_id: user?.id,
       salon_id: salonId,
@@ -369,9 +370,9 @@ const BookAppointment = () => {
       booking_date: format(selectedDate!, "yyyy-MM-dd"),
       booking_time: selectedTime,
       notes: `[GUEST: ${memberDetails.fullName} | ${memberDetails.phone}] ${notes}`.trim(),
-      status: "pending",
+      status: isPayingNow ? "pending" : "confirmed",
       use_coins: useCoins,
-      price_paid: finalPriceTotal,
+      price_paid: 0,
       discount_amount: couponDiscount,
       coupon_code: appliedCoupon?.code
     };
@@ -382,7 +383,7 @@ const BookAppointment = () => {
       const res: any = await api.bookings.create({
         ...bookingPayload,
         service_id: selectedServices[0]?.id || null,
-        price_paid: finalPriceTotal || 100
+        price_paid: 0
       });
       if (res?.id) newBookingIds.push(res.id);
     } else {
@@ -390,11 +391,10 @@ const BookAppointment = () => {
       for (let i = 0; i < totalItems.length; i++) {
         const service = totalItems[i];
         const serviceDiscount = i === 0 ? couponDiscount : 0;
-        const serviceCoinDiscount = i === 0 ? coinDiscount : 0;
         const res: any = await api.bookings.create({
           ...bookingPayload,
           service_id: service.id,
-          price_paid: Math.max(0, Number(service.price) - serviceDiscount - serviceCoinDiscount),
+          price_paid: 0,
           discount_amount: serviceDiscount
         });
         if (res?.id) newBookingIds.push(res.id);

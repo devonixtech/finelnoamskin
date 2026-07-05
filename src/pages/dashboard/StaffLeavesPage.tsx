@@ -248,7 +248,7 @@ export default function StaffLeavesPage() {
                                         type="date"
                                         value={newLeave.start_date}
                                         onChange={e => setNewLeave({ ...newLeave, start_date: e.target.value })}
-                                        className="h-12 bg-slate-50 border-none rounded-xl text-xs font-bold"
+                                        className="h-12 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-900"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -257,7 +257,7 @@ export default function StaffLeavesPage() {
                                         type="date"
                                         value={newLeave.end_date}
                                         onChange={e => setNewLeave({ ...newLeave, end_date: e.target.value })}
-                                        className="h-12 bg-slate-50 border-none rounded-xl text-xs font-bold"
+                                        className="h-12 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-900"
                                     />
                                 </div>
                             </div>
@@ -271,11 +271,11 @@ export default function StaffLeavesPage() {
                                     <SelectTrigger className="h-12 bg-white/5 border-none rounded-xl text-xs font-bold text-white uppercase tracking-widest">
                                         <SelectValue placeholder="Select type" />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-xl border-none shadow-xl">
-                                        <SelectItem value="casual">Casual Leave</SelectItem>
-                                        <SelectItem value="sick">Medical / Sick</SelectItem>
-                                        <SelectItem value="emergency">Emergency Pause</SelectItem>
-                                        <SelectItem value="unpaid">Unpaid / Personalized</SelectItem>
+                                    <SelectContent className="rounded-xl border-none shadow-xl bg-slate-800 text-white">
+                                        <SelectItem value="casual" className="hover:bg-slate-700 focus:bg-slate-700">Casual Leave</SelectItem>
+                                        <SelectItem value="sick" className="hover:bg-slate-700 focus:bg-slate-700">Medical / Sick</SelectItem>
+                                        <SelectItem value="emergency" className="hover:bg-slate-700 focus:bg-slate-700">Emergency Pause</SelectItem>
+                                        <SelectItem value="unpaid" className="hover:bg-slate-700 focus:bg-slate-700">Unpaid / Personalized</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

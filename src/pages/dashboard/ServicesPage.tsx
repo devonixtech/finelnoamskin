@@ -365,7 +365,7 @@ export default function ServicesPage() {
 
   const totalServices = services.length;
   const activeServices = services.filter(s => s.is_active).length;
-  const avgPrice = services.length > 0 ? services.reduce((sum, s) => sum + s.price, 0) / services.length : 0;
+  const avgPrice = services.length > 0 ? services.reduce((sum, s) => sum + Number(s.price || 0), 0) / services.length : 0;
 
   if (authLoading || salonLoading) {
     return (

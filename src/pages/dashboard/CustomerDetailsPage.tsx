@@ -119,8 +119,9 @@ export default function CustomerDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("history");
     const [purchases, setPurchases] = useState<any[]>([]);
+    const [inventoryItems, setInventoryItems] = useState<any[]>([]);
     const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
-    const [newPurchase, setNewPurchase] = useState({ product_name: "", price: "" });
+    const [newPurchase, setNewPurchase] = useState({ product_name: "", price: "", inventory_id: "" });
     const [savingPurchase, setSavingPurchase] = useState(false);
 
     const [dob, setDob] = useState("");
@@ -236,6 +237,14 @@ export default function CustomerDetailsPage() {
                 setPurchases(purchasesData || []);
             } catch (err) {
                 console.warn("Error fetching purchases:", err);
+            }
+
+            // Fetch Inventory
+            try {
+                const inventoryData = await api.inventory.getBySalon(currentSalon.id);
+                setInventoryItems(inventoryData?.items || []);
+            } catch (err) {
+                console.warn("Error fetching inventory:", err);
             }
 
             // Fetch Treatment History
@@ -392,9 +401,28 @@ export default function CustomerDetailsPage() {
         }
     };
 
-    const handleOpenTreatmentRecord = async (booking: Booking) => {
+    const handleOpenTreatmentRecord = async (booking: Booking, existingRecord?: any) => {
         setSelectedBooking(booking);
         setIsTreatmentDialogOpen(true);
+        
+        if (existingRecord) {
+            setTreatmentData({
+                treatment_details: existingRecord.treatment_details || "",
+                products_used: existingRecord.products_used || "",
+                skin_reaction: existingRecord.skin_reaction || "",
+                improvement_notes: existingRecord.improvement_notes || "",
+                recommended_next_treatment: existingRecord.recommended_next_treatment || "",
+                post_treatment_instructions: existingRecord.post_treatment_instructions || "",
+                follow_up_reminder_date: existingRecord.follow_up_reminder_date || "",
+                marketing_notes: existingRecord.marketing_notes || "",
+                before_photo_url: existingRecord.before_photo_url || "",
+                after_photo_url: existingRecord.after_photo_url || "",
+                service_name_manual: existingRecord.service_name_manual || "",
+                record_date: existingRecord.record_date || (booking.booking_date ? safeFormat(booking.booking_date, 'yyyy-MM-dd') : safeFormat(new Date(), 'yyyy-MM-dd'))
+            });
+            return;
+        }
+
         try {
             const data = await api.customerRecords.getTreatmentRecord(booking.id);
             if (data?.record) {
@@ -507,12 +535,13 @@ export default function CustomerDetailsPage() {
                 salon_id: currentSalon.id,
                 product_name: newPurchase.product_name,
                 price: parseFloat(newPurchase.price),
-                purchase_date: new Date().toISOString().split('T')[0]
+                purchase_date: new Date().toISOString().split('T')[0],
+                inventory_id: newPurchase.inventory_id || undefined
             });
 
             toast({ title: "Success", description: "Product purchase recorded." });
             setIsPurchaseDialogOpen(false);
-            setNewPurchase({ product_name: "", price: "" });
+            setNewPurchase({ product_name: "", price: "", inventory_id: "" });
 
             // Refresh purchases
             const purchasesData = await api.productPurchases.getByCustomer(userId, currentSalon.id);
@@ -734,7 +763,7 @@ export default function CustomerDetailsPage() {
                                                     treatments.map((tr, idx) => (
                                                         <div key={tr.id} className="relative pl-6 border-l-2 border-border py-1">
                                                             <div className="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-border border-2 border-card" />
-                                                            <div className="bg-muted/30 p-3 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleOpenTreatmentRecord({ id: tr.booking_id, service_name: tr.service_name || tr.service_name_manual, booking_date: tr.booking_date || tr.record_date || tr.created_at } as any)}>
+                                                            <div className="bg-muted/30 p-3 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleOpenTreatmentRecord({ id: tr.booking_id, service_name: tr.service_name || tr.service_name_manual, booking_date: tr.booking_date || tr.record_date || tr.created_at } as any, tr)}>
                                                                 <div className="flex justify-between items-start mb-1">
                                                                     <span className="text-[10px] font-black text-muted-foreground uppercase">{safeFormat(tr.booking_date || tr.record_date || tr.created_at, 'MMM dd, yyyy')}</span>
                                                                     {tr.before_photo_url && tr.after_photo_url && <Sparkles className="w-3 h-3 text-emerald-500" />}
@@ -1072,11 +1101,25 @@ export default function CustomerDetailsPage() {
                             <Label htmlFor="product-name">Product Name</Label>
                             <Input
                                 id="product-name"
+                                list="inventory-list"
                                 placeholder="e.g. Daily Cleanser"
                                 value={newPurchase.product_name}
-                                onChange={e => setNewPurchase({ ...newPurchase, product_name: e.target.value })}
+                                onChange={e => {
+                                    const val = e.target.value;
+                                    const matched = inventoryItems.find((item: any) => item.name === val);
+                                    if (matched) {
+                                        setNewPurchase({ ...newPurchase, product_name: val, price: matched.price.toString(), inventory_id: matched.id });
+                                    } else {
+                                        setNewPurchase({ ...newPurchase, product_name: val, inventory_id: "" });
+                                    }
+                                }}
                                 className="bg-muted border-border"
                             />
+                            <datalist id="inventory-list">
+                                {inventoryItems.map((item: any) => (
+                                    <option key={item.id} value={item.name} />
+                                ))}
+                            </datalist>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="product-price">Price (MYR)</Label>
