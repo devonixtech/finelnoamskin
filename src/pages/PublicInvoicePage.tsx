@@ -16,7 +16,7 @@ export default function PublicInvoicePage() {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+        const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://salonbackend-production-c623.up.railway.app/api';
         const res = await fetch(`${VITE_API_BASE_URL}/bookings/${id}/invoice`);
         if (!res.ok) throw new Error("Invoice not found or could not be loaded.");
         const data = await res.json();

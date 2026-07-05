@@ -23,7 +23,7 @@ const TestEmail = () => {
         setLoading(true);
 
         try {
-            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "https://salonbackend-production-c623.up.railway.app/api";
             const response = await fetch(`${apiBaseUrl}/mail/test`, {
                 method: "POST",
                 headers: {

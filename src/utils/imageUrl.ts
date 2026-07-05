@@ -3,7 +3,7 @@
  * Normalizes image paths from the database for the migrated backend
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://salonbackend-production-c623.up.railway.app/api';
 
 // Extract the base URL without the /api suffix (e.g., http://localhost:5000)
 const BACKEND_URL = API_BASE_URL.replace(/\/api\/?$/, '');

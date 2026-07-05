@@ -1,5 +1,5 @@
 // API service for the migrated Express backend.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://salonbackend-production-c623.up.railway.app/api';
 // Helper function to get auth token
 const getAuthToken = (): string | null => {
     return localStorage.getItem('auth_token');

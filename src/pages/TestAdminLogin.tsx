@@ -55,7 +55,7 @@ export default function TestAdminLogin() {
     try {
       console.log('Testing local backend connection...');
 
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://salonbackend-production-c623.up.railway.app/api';
       const response = await fetch(`${apiBaseUrl}/health`);
       const data = await response.json();
 
