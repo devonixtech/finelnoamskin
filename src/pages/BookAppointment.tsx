@@ -925,7 +925,11 @@ const BookAppointment = () => {
                               key={offer.id}
                               type="button"
                               onClick={() => {
-                                if (!isApplied) {
+                                if (isApplied) {
+                                  setCouponCode("");
+                                  setAppliedCoupon(null);
+                                  setCouponError("");
+                                } else {
                                   setCouponCode(offer.code);
                                   setAppliedCoupon(null);
                                   setCouponError("");
@@ -972,11 +976,19 @@ const BookAppointment = () => {
                           className="h-14 md:h-16 rounded-2xl bg-white border-2 border-slate-100 focus:border-accent px-4 md:px-6 font-bold text-slate-900 placeholder:text-slate-400 text-sm"
                         />
                         <Button
-                          onClick={() => applyCoupon()}
-                          disabled={!couponCode || !!appliedCoupon}
+                          onClick={() => {
+                            if (appliedCoupon) {
+                              setCouponCode("");
+                              setAppliedCoupon(null);
+                              setCouponError("");
+                            } else {
+                              applyCoupon();
+                            }
+                          }}
+                          disabled={!couponCode && !appliedCoupon}
                           className="h-14 md:h-16 px-6 md:px-8 rounded-2xl bg-[#1A1A1A] hover:bg-black text-white font-black uppercase tracking-widest text-xs md:text-sm"
                         >
-                          {appliedCoupon ? "OK" : "Apply"}
+                          {appliedCoupon ? "Remove" : "Apply"}
                         </Button>
                       </div>
                       {appliedCoupon && appliedCoupon.discount > 0 && (
