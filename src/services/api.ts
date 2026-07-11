@@ -189,8 +189,8 @@ const normalizeBooking = (booking: any) => {
         booking_time: typeof booking.booking_time === 'string'
             ? booking.booking_time
             : (booking.booking_time ? String(booking.booking_time) : ''),
-        customer_name: (booking.user?.profile?.full_name || booking.full_name || (booking.notes?.match(/\[GUEST:\s*(.*?)\s*\|/)?.[1]) || booking.notes?.replace(/\[GUEST:.*?\]/g, '') || '').trim(),
-        customer_phone: (booking.user?.profile?.phone || booking.phone || (booking.notes?.match(/\|\s*(.*?)\s*\]/)?.[1]) || '').trim(),
+        customer_name: ((booking.notes?.match(/\[GUEST:\s*(.*?)\s*\|/)?.[1]) || booking.user?.profile?.full_name || booking.full_name || booking.notes?.replace(/\[GUEST:.*?\]/g, '') || '').trim(),
+        customer_phone: ((booking.notes?.match(/\|\s*(.*?)\s*\]/)?.[1]) || booking.user?.profile?.phone || booking.phone || '').trim(),
         customer_email: (booking.user?.email || booking.email || '').trim(),
     };
 };

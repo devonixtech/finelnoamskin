@@ -283,7 +283,7 @@ const BillingPage = () => {
         price_paid: newInvoice.amount,
         status: newInvoice.status === 'paid' ? 'completed' : 'confirmed',
         payment_method: newInvoice.paymentMethod,
-        notes: newInvoice.notes || "Manual Invoice",
+        notes: `[GUEST: ${newInvoice.notes || 'Walk-in'} | ]`,
       });
 
       toast({ title: "Invoice Created", description: "Successfully added to ledger" });
