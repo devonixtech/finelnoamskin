@@ -172,9 +172,21 @@ const normalizeBooking = (booking: any) => {
     const servicePrice = Number(service.price || 0);
     const pricePaid = Number(booking.price_paid || 0);
 
+    let parsedServiceName = booking.service_name || service.name || booking.service?.title || 'Service';
+    let items: any[] = [];
+    const itemsMatch = booking.notes?.match(/ITEMS:\s*(\{.*\})/);
+    if (itemsMatch) {
+      try {
+        items = JSON.parse(itemsMatch[1]).items || [];
+        if (items.length > 0) {
+          parsedServiceName = items.length === 1 ? items[0].name : `${items[0].name} + ${items.length - 1} item(s)`;
+        }
+      } catch (e) {}
+    }
+
     return {
         ...booking,
-        service_name: booking.service_name || service.name || booking.service?.title || 'Service',
+        service_name: parsedServiceName,
         price: servicePrice || pricePaid,
         amount_paid: pricePaid,
         service_price: servicePrice,

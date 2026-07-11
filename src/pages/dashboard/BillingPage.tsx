@@ -105,16 +105,19 @@ const BillingPage = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [creating, setCreating] = useState(false);
   const [services, setServices] = useState<Array<{ id: string; name: string; price: number }>>([]);
+  const [products, setProducts] = useState<Array<{ id: string; name: string; price: number }>>([]);
+  type InvoiceItem = { type: 'service' | 'product', id?: string, name: string, price: number, quantity: number };
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
   const [newInvoice, setNewInvoice] = useState({
     customerId: "",
-    serviceId: "",
-    amount: 0,
     date: format(new Date(), "yyyy-MM-dd"),
     time: format(new Date(), "HH:mm"),
     paymentMethod: "Cash",
     status: "paid" as 'paid' | 'pending',
     notes: "",
   });
+
+  const computedTotalAmount = invoiceItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   // Selected Invoice Modal State
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -260,30 +263,37 @@ const BillingPage = () => {
     }
   }, [currentSalon, salonLoading]);
 
-  const fetchServices = useCallback(async () => {
+  const fetchServicesAndProducts = useCallback(async () => {
     if (!currentSalon) return;
     try {
-      const data = await api.services.getBySalon(currentSalon.id);
-      setServices(Array.isArray(data) ? data.filter((s: any) => s.is_active) : []);
+      const [servicesData, inventoryData] = await Promise.all([
+        api.services.getBySalon(currentSalon.id),
+        api.inventory.getAll(currentSalon.id).catch(() => [])
+      ]);
+      setServices(Array.isArray(servicesData) ? servicesData.filter((s: any) => s.is_active) : []);
+      setProducts(Array.isArray(inventoryData) ? inventoryData : []);
     } catch (error) {
-      console.error("Error fetching services:", error);
+      console.error("Error fetching services and products:", error);
     }
   }, [currentSalon]);
 
   const handleCreateInvoice = async () => {
-    if (!currentSalon || !newInvoice.serviceId) return;
+    if (!currentSalon || invoiceItems.length === 0) return;
 
     setCreating(true);
     try {
+      const mainService = invoiceItems.find(i => i.type === 'service') || invoiceItems[0];
+      const itemsPayload = JSON.stringify({ items: invoiceItems });
+      
       await api.bookings.create({
         salon_id: currentSalon.id,
-        service_id: newInvoice.serviceId,
+        service_id: mainService.id || 'custom-item',
         booking_date: newInvoice.date,
         booking_time: newInvoice.time,
-        price_paid: newInvoice.amount,
+        price_paid: computedTotalAmount,
         status: newInvoice.status === 'paid' ? 'completed' : 'confirmed',
         payment_method: newInvoice.paymentMethod,
-        notes: `[GUEST: ${newInvoice.notes || 'Walk-in'} | ]`,
+        notes: `[GUEST: ${newInvoice.notes || 'Walk-in'} | ] ITEMS: ${itemsPayload}`,
       });
 
       toast({ title: "Invoice Created", description: "Successfully added to ledger" });
@@ -351,7 +361,7 @@ const BillingPage = () => {
             <Button variant="outline" onClick={fetchInvoices} disabled={refreshing} className="rounded-xl font-bold bg-muted/50 border-border hover:bg-muted transition-all">
               <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} /> Refresh
             </Button>
-            <Button onClick={() => { fetchServices(); setShowCreateDialog(true); }} className="bg-accent text-white font-black rounded-xl shadow-lg shadow-accent/20">
+            <Button onClick={() => { fetchServicesAndProducts(); setInvoiceItems([]); setShowCreateDialog(true); }} className="bg-accent text-white font-black rounded-xl shadow-lg shadow-accent/20">
               <Plus className="w-4 h-4 mr-2" /> New Invoice
             </Button>
           </div>
@@ -618,25 +628,56 @@ const BillingPage = () => {
                   className="bg-secondary/30 border-none h-12 rounded-xl"
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Select Service</Label>
-                <Select onValueChange={v => {
-                  const s = services.find(x => x.id === v);
-                  setNewInvoice({ ...newInvoice, serviceId: v, amount: s?.price || 0 });
-                }}>
-                  <SelectTrigger className="bg-secondary/30 border-none h-12 rounded-xl">
-                    <SelectValue placeholder="Pick a service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {services.map(s => (
-                      <SelectItem key={s.id} value={s.id}>{s.name} (MYR {s.price})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-4">
+                <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Items ({invoiceItems.length})</Label>
+                {invoiceItems.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-secondary/20 p-2 rounded-xl">
+                    <div className="flex-1 text-sm font-medium">{item.name}</div>
+                    <div className="text-sm">MYR {item.price} x {item.quantity}</div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setInvoiceItems(prev => prev.filter((_, i) => i !== idx))}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                
+                <div className="flex gap-2">
+                  <Select onValueChange={v => {
+                    const s = services.find(x => x.id === v);
+                    if (s) setInvoiceItems(prev => [...prev, { type: 'service', id: s.id, name: s.name, price: Number(s.price), quantity: 1 }]);
+                  }}>
+                    <SelectTrigger className="bg-secondary/30 border-none h-10 rounded-xl flex-1">
+                      <SelectValue placeholder="+ Add Service" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {services.map(s => (
+                        <SelectItem key={s.id} value={s.id}>{s.name} (MYR {s.price})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select onValueChange={v => {
+                    const p = products.find(x => x.id === v);
+                    if (p) setInvoiceItems(prev => [...prev, { type: 'product', id: p.id, name: p.name, price: Number(p.price), quantity: 1 }]);
+                  }}>
+                    <SelectTrigger className="bg-secondary/30 border-none h-10 rounded-xl flex-1">
+                      <SelectValue placeholder="+ Add Product" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.name} (MYR {p.price})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex justify-between items-center bg-accent/10 p-3 rounded-xl">
+                  <span className="font-bold">Total Amount</span>
+                  <span className="font-black text-accent text-lg">MYR {computedTotalAmount.toFixed(2)}</span>
+                </div>
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleCreateInvoice} disabled={creating || !newInvoice.serviceId} className="bg-accent text-white font-black w-full h-12 rounded-xl shadow-lg shadow-accent/20">
+              <Button onClick={handleCreateInvoice} disabled={creating || invoiceItems.length === 0} className="bg-accent text-white font-black w-full h-12 rounded-xl shadow-lg shadow-accent/20">
                 {creating ? "Processing..." : "Generate & Post Invoice"}
               </Button>
             </DialogFooter>
