@@ -209,7 +209,7 @@ const OffersPage = () => {
       title: offer.title,
       description: offer.description || "",
       code: offer.code,
-      type: offer.type,
+      type: offer.type || offer.discount_type,
       value: offer.value.toString(),
       max_usage: offer.max_usage?.toString() || "",
       start_date: offer.start_date ? new Date(offer.start_date).toISOString().split('T')[0] : "",
@@ -354,7 +354,7 @@ const OffersPage = () => {
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
-                            {getOfferTypeIcon(offer.type)}
+                            {getOfferTypeIcon(offer.type || offer.discount_type)}
                           </div>
                           <div>
                             <p className="font-medium text-foreground">{offer.title}</p>
@@ -372,8 +372,8 @@ const OffersPage = () => {
                         <div className="flex items-center gap-4">
                           <div className="text-right">
                             <p className="font-medium text-foreground">
-                              {offer.type === "percentage" ? `${offer.value}% OFF` :
-                                offer.type === "fixed" ? `MYR ${offer.value} OFF` : "BOGO"}
+                              {(offer.type || offer.discount_type) === "percentage" ? `${(offer.value || offer.discount_value)}% OFF` :
+                                (offer.type || offer.discount_type) === "fixed" ? `MYR ${(offer.value || offer.discount_value)} OFF` : "BOGO"}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               Expires: {offer.end_date ? new Date(offer.end_date).toLocaleDateString() : "Never"}
@@ -439,7 +439,7 @@ const OffersPage = () => {
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                            {getOfferTypeIcon(offer.type)}
+                            {getOfferTypeIcon(offer.type || offer.discount_type)}
                           </div>
                           <div>
                             <p className="font-medium text-foreground">{offer.title}</p>
@@ -457,8 +457,8 @@ const OffersPage = () => {
                         <div className="flex items-center gap-4">
                           <div className="text-right">
                             <p className="font-medium text-muted-foreground">
-                              {offer.type === "percentage" ? `${offer.value}% OFF` :
-                                offer.type === "fixed" ? `MYR ${offer.value} OFF` : "BOGO"}
+                              {(offer.type || offer.discount_type) === "percentage" ? `${(offer.value || offer.discount_value)}% OFF` :
+                                (offer.type || offer.discount_type) === "fixed" ? `MYR ${(offer.value || offer.discount_value)} OFF` : "BOGO"}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               End Date: {offer.end_date ? new Date(offer.end_date).toLocaleDateString() : "Never"}

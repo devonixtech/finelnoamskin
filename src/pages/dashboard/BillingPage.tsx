@@ -115,6 +115,7 @@ const BillingPage = () => {
     paymentMethod: "Cash",
     status: "paid" as 'paid' | 'pending',
     notes: "",
+    guestPhone: "",
   });
 
   const computedTotalAmount = invoiceItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -266,12 +267,22 @@ const BillingPage = () => {
   const fetchServicesAndProducts = useCallback(async () => {
     if (!currentSalon) return;
     try {
-      const [servicesData, inventoryData] = await Promise.all([
-        api.services.getBySalon(currentSalon.id),
-        api.inventory.getAll(currentSalon.id).catch(() => [])
+      const [servicesData, inventoryResponse, platformProductsData] = await Promise.all([
+        api.services.getBySalon(currentSalon.id).catch(() => []),
+        api.inventory.getBySalon(currentSalon.id).catch(() => ({ items: [] })),
+        api.platformProducts.getAll().catch(() => [])
       ]);
       setServices(Array.isArray(servicesData) ? servicesData.filter((s: any) => s.is_active) : []);
-      setProducts(Array.isArray(inventoryData) ? inventoryData : []);
+      const inventoryData = inventoryResponse?.items || inventoryResponse || [];
+      const platformProducts = Array.isArray(platformProductsData) ? platformProductsData : [];
+      
+      const mergedProducts = [...inventoryData];
+      platformProducts.forEach((pp: any) => {
+        if (!mergedProducts.some(mp => mp.name === pp.name)) {
+          mergedProducts.push(pp);
+        }
+      });
+      setProducts(mergedProducts);
     } catch (error) {
       console.error("Error fetching services and products:", error);
     }
@@ -293,7 +304,7 @@ const BillingPage = () => {
         price_paid: computedTotalAmount,
         status: newInvoice.status === 'paid' ? 'completed' : 'confirmed',
         payment_method: newInvoice.paymentMethod,
-        notes: `[GUEST: ${newInvoice.notes || 'Walk-in'} | ] ITEMS: ${itemsPayload}`,
+        notes: `[GUEST: ${newInvoice.notes || 'Walk-in'} | ${newInvoice.guestPhone || ''} ] ITEMS: ${itemsPayload}`,
       });
 
       toast({ title: "Invoice Created", description: "Successfully added to ledger" });
@@ -619,14 +630,25 @@ const BillingPage = () => {
               <DialogDescription className="font-medium">Direct entry for walk-in payments.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Guest Name</Label>
-                <Input
-                  placeholder="Customer Name"
-                  value={newInvoice.notes}
-                  onChange={e => setNewInvoice({ ...newInvoice, notes: e.target.value })}
-                  className="bg-secondary/30 border-none h-12 rounded-xl"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Guest Name</Label>
+                  <Input
+                    placeholder="Customer Name"
+                    value={newInvoice.notes}
+                    onChange={e => setNewInvoice({ ...newInvoice, notes: e.target.value })}
+                    className="bg-secondary/30 border-none h-12 rounded-xl"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Guest Phone</Label>
+                  <Input
+                    placeholder="+60123456789"
+                    value={newInvoice.guestPhone}
+                    onChange={e => setNewInvoice({ ...newInvoice, guestPhone: e.target.value })}
+                    className="bg-secondary/30 border-none h-12 rounded-xl"
+                  />
+                </div>
               </div>
               <div className="space-y-4">
                 <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Items ({invoiceItems.length})</Label>
@@ -648,7 +670,7 @@ const BillingPage = () => {
                     <SelectTrigger className="bg-secondary/30 border-none h-10 rounded-xl flex-1">
                       <SelectValue placeholder="+ Add Service" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent side="bottom" sideOffset={4}>
                       {services.map(s => (
                         <SelectItem key={s.id} value={s.id}>{s.name} (MYR {s.price})</SelectItem>
                       ))}
@@ -662,7 +684,7 @@ const BillingPage = () => {
                     <SelectTrigger className="bg-secondary/30 border-none h-10 rounded-xl flex-1">
                       <SelectValue placeholder="+ Add Product" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent side="bottom" sideOffset={4}>
                       {products.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name} (MYR {p.price})</SelectItem>
                       ))}
