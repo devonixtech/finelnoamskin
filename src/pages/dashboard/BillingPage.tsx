@@ -537,22 +537,43 @@ const BillingPage = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="font-medium border-b border-slate-100">
-                          <td className="px-4 md:px-6 py-5">
-                            <p className="text-slate-900 print:text-slate-900 font-bold">{selectedInvoice.service}</p>
-                            <p className="text-slate-500 print:text-slate-500 text-xs mt-1 hidden md:block">Professional salon services provided by our staff.</p>
-                            {/* On mobile, show summary details inline */}
-                            <div className="text-[10px] text-slate-500 mt-1 md:hidden space-y-0.5">
-                              <p>Rate: MYR {selectedInvoice.subtotal} • Qty: 1</p>
-                              {selectedInvoice.discount > 0 && <p className="text-amber-600">Discount: - MYR {selectedInvoice.discount}</p>}
-                            </div>
-                          </td>
-                          <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">MYR {selectedInvoice.subtotal}</td>
-                          <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">1</td>
-                          <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">0%</td>
-                          <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">MYR {selectedInvoice.discount}</td>
-                          <td className="px-4 md:px-6 py-5 text-right font-bold text-slate-900 print:text-slate-900">MYR {selectedInvoice.amount}</td>
-                        </tr>
+                        {(() => {
+                          let items = [];
+                          if (selectedInvoice.notes && selectedInvoice.notes.includes('ITEMS: {')) {
+                            try {
+                              const jsonStr = selectedInvoice.notes.substring(selectedInvoice.notes.indexOf('ITEMS: ') + 7);
+                              const parsed = JSON.parse(jsonStr);
+                              if (parsed.items && Array.isArray(parsed.items)) {
+                                items = parsed.items;
+                              }
+                            } catch (e) {}
+                          }
+                          if (items.length === 0) {
+                            items = [{
+                              name: selectedInvoice.service,
+                              price: selectedInvoice.subtotal,
+                              quantity: 1,
+                              type: 'service'
+                            }];
+                          }
+                          return items.map((item: any, idx: number) => (
+                            <tr key={idx} className="font-medium border-b border-slate-100">
+                              <td className="px-4 md:px-6 py-5">
+                                <p className="text-slate-900 print:text-slate-900 font-bold">{item.name}</p>
+                                <p className="text-slate-500 print:text-slate-500 text-xs mt-1 hidden md:block capitalize">{item.type || 'Item'}</p>
+                                {/* On mobile, show summary details inline */}
+                                <div className="text-[10px] text-slate-500 mt-1 md:hidden space-y-0.5">
+                                  <p>Rate: MYR {item.price} • Qty: {item.quantity}</p>
+                                </div>
+                              </td>
+                              <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">MYR {item.price}</td>
+                              <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">{item.quantity}</td>
+                              <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">0%</td>
+                              <td className="px-4 md:px-6 py-5 text-center text-slate-800 print:text-slate-700 hidden md:table-cell">-</td>
+                              <td className="px-4 md:px-6 py-5 text-right font-bold text-slate-900 print:text-slate-900">MYR {(item.price * item.quantity).toFixed(2)}</td>
+                            </tr>
+                          ));
+                        })()}
                       </tbody>
                     </table>
                   </div>

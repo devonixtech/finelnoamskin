@@ -132,14 +132,37 @@ export default function PublicInvoicePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  <tr>
-                    <td className="py-4">
-                      <p className="font-bold text-slate-900 text-base">{invoice.service}</p>
-                      <p className="text-slate-500 text-xs mt-1">Specialist: {(!invoice.staff || invoice.staff === 'N/A' || invoice.staff === 'na') ? '-' : invoice.staff}</p>
-                    </td>
-                    <td className="py-4 px-4 text-right text-slate-500">1</td>
-                    <td className="py-4 pl-4 text-right font-medium text-slate-900">MYR {invoice.subtotal.toFixed(2)}</td>
-                  </tr>
+                  {(() => {
+                    let items = [];
+                    if (invoice.notes && invoice.notes.includes('ITEMS: {')) {
+                      try {
+                        const jsonStr = invoice.notes.substring(invoice.notes.indexOf('ITEMS: ') + 7);
+                        const parsed = JSON.parse(jsonStr);
+                        if (parsed.items && Array.isArray(parsed.items)) {
+                          items = parsed.items;
+                        }
+                      } catch (e) {}
+                    }
+                    if (items.length === 0) {
+                      items = [{
+                        name: invoice.service,
+                        price: invoice.subtotal,
+                        quantity: 1,
+                        staff: invoice.staff,
+                        type: 'service'
+                      }];
+                    }
+                    return items.map((item: any, idx: number) => (
+                      <tr key={idx}>
+                        <td className="py-4">
+                          <p className="font-bold text-slate-900 text-base">{item.name}</p>
+                          <p className="text-slate-500 text-xs mt-1 capitalize">{item.type === 'service' ? `Specialist: ${(!item.staff || item.staff === 'N/A' || item.staff === 'na' || !invoice.staff || invoice.staff === 'N/A' || invoice.staff === 'na') ? '-' : invoice.staff}` : 'Product'}</p>
+                        </td>
+                        <td className="py-4 px-4 text-right text-slate-500">{item.quantity}</td>
+                        <td className="py-4 pl-4 text-right font-medium text-slate-900">MYR {(item.price * item.quantity).toFixed(2)}</td>
+                      </tr>
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>
