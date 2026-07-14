@@ -5,11 +5,33 @@ import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ArrowLeft } from "lucide-
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import api from "@/services/api";
 
 const CartPage = () => {
  const { cart, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
+ const [platformSettings, setPlatformSettings] = React.useState({
+    shipping_fee: 15,
+    free_shipping_min: 150
+ });
 
- const shipping = cart.length > 0 ? 15 : 0;
+ React.useEffect(() => {
+    const loadSettings = async () => {
+        try {
+            const data = await api.admin.getSettings();
+            if (data) {
+                setPlatformSettings({
+                    shipping_fee: Number(data.shipping_fee ?? 15),
+                    free_shipping_min: Number(data.free_shipping_min ?? 150)
+                });
+            }
+        } catch (e) {
+            console.error('Failed to load cart settings', e);
+        }
+    };
+    loadSettings();
+ }, []);
+
+ const shipping = cart.length > 0 ? (cartTotal >= platformSettings.free_shipping_min ? 0 : platformSettings.shipping_fee) : 0;
  const finalTotal = cartTotal + shipping;
 
  return (

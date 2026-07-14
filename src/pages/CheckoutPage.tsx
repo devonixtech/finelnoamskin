@@ -87,7 +87,9 @@ const CheckoutPage = () => {
     }, []);
 
     const shippingFeeConfig = platformSettings.shipping_fee;
-    const shippingCost = deliveryMethod === 'ship' ? shippingFeeConfig : 0;
+    const shippingCost = deliveryMethod === 'ship' 
+        ? (cartTotal >= platformSettings.free_shipping_min ? 0 : shippingFeeConfig) 
+        : 0;
     const taxAmount = cartTotal * TAX_RATE;
     const finalTotal = cartTotal + shippingCost + taxAmount;
 
