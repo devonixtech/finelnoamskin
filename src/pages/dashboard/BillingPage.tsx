@@ -221,7 +221,7 @@ const BillingPage = () => {
           customer: customerName,
           customerId: booking.user_id,
           service: booking.service_name || 'Service',
-          amount: Number(booking.price || 0),
+          amount: Number(booking.amount_paid || booking.price || 0),
           date: booking.booking_date,
           status: iscash ? 'cash' : isPaid ? 'paid' : 'pending',
           paymentMethod: pp?.payment_method || booking.payment_method || 'Cash',
@@ -229,12 +229,14 @@ const BillingPage = () => {
           customerEmail: pp?.invoice_url ? '' : (booking.customer_email || ''),
           customerPhone: booking.customer_phone || '',
           discount: Number(booking.discount_amount || 0),
-          subtotal: Number(booking.service_price || booking.price || 0),
+          subtotal: Number(booking.amount_paid || booking.price || 0), // Base subtotal on actual paid amount before discounts
           coinsUsed: Number(booking.coins_used || 0),
           loyaltyPointsUsed: Number(booking.loyalty_points_used || 0),
           coinValue: Number(booking.coin_currency_value || 0) * (Number(booking.coins_used || 0) + Number(booking.loyalty_points_used || 0)),
           type: 'appointment',
           invoiceUrl: pp?.invoice_url || `${window.location.origin}/invoices/${booking.id}`,
+          notes: booking.notes,
+          staff: booking.staff_name || '-',
         };
       });
 
