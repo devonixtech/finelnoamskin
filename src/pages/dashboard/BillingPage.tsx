@@ -255,8 +255,15 @@ const BillingPage = () => {
           } catch (e) {}
         }
 
+        const discount = Number(booking.discount_amount || 0);
+        const coinsUsed = Number(booking.coins_used || 0);
+        const loyaltyPointsUsed = Number(booking.loyalty_points_used || 0);
+        const coinValue = Number(booking.coin_currency_value || 0) * (coinsUsed + loyaltyPointsUsed);
+        
+        const finalPayable = Math.max(0, totalValue - discount - coinValue);
+
         const isPaid = booking.status === 'completed';
-        const isDeposit = booking.status === 'confirmed' && actualPaid > 0 && actualPaid < totalValue;
+        const isDeposit = booking.status === 'confirmed' && actualPaid > 0 && actualPaid < finalPayable;
         const iscash = !isPaid && !isDeposit && new Date(booking.booking_date) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         const customerName = booking.customer_name || booking.user?.profile?.full_name || 'Walk-in';
 
@@ -273,12 +280,12 @@ const BillingPage = () => {
           time: booking.booking_time || '00:00',
           customerEmail: pp?.invoice_url ? '' : (booking.customer_email || booking.user?.email || ''),
           customerPhone: booking.customer_phone || booking.user?.profile?.phone || '',
-          discount: Number(booking.discount_amount || 0),
+          discount,
           subtotal: actualPaid || totalValue, // base subtotal for the display
-          totalValue: totalValue, // keeping track of the actual total for later calculations
-          coinsUsed: Number(booking.coins_used || 0),
-          loyaltyPointsUsed: Number(booking.loyalty_points_used || 0),
-          coinValue: Number(booking.coin_currency_value || 0) * (Number(booking.coins_used || 0) + Number(booking.loyalty_points_used || 0)),
+          totalValue, // keeping track of the actual total for later calculations
+          coinsUsed,
+          loyaltyPointsUsed,
+          coinValue,
           type: 'appointment',
           invoiceUrl: pp?.invoice_url || `${window.location.origin}/invoices/${booking.id}`,
           notes: booking.notes,
