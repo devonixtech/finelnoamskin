@@ -838,17 +838,39 @@ const BillingPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="font-medium text-slate-700">
-                      <td className="px-6 py-5">
-                        <p className="font-bold text-slate-900">{selectedInvoice.service}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">Professional session inclusive of all taxes.</p>
-                      </td>
-                      <td className="px-6 py-5 text-center">MYR {selectedInvoice.subtotal}</td>
-                      <td className="px-6 py-5 text-center">1</td>
-                      <td className="px-6 py-5 text-center">0%</td>
-                      <td className="px-6 py-5 text-center">MYR {selectedInvoice.discount}</td>
-                      <td className="px-6 py-5 text-right font-bold text-slate-900">MYR {selectedInvoice.amount}</td>
-                    </tr>
+                    {(() => {
+                      let items = [];
+                      if (selectedInvoice.notes && selectedInvoice.notes.includes('ITEMS: {')) {
+                        try {
+                          const jsonStr = selectedInvoice.notes.substring(selectedInvoice.notes.indexOf('ITEMS: ') + 7);
+                          const parsed = JSON.parse(jsonStr);
+                          if (parsed.items && Array.isArray(parsed.items)) {
+                            items = parsed.items;
+                          }
+                        } catch (e) {}
+                      }
+                      if (items.length === 0) {
+                        items = [{
+                          name: selectedInvoice.service,
+                          price: selectedInvoice.subtotal,
+                          quantity: 1,
+                          type: 'service'
+                        }];
+                      }
+                      return items.map((item: any, idx: number) => (
+                        <tr key={idx} className="font-medium text-slate-700">
+                          <td className="px-6 py-5">
+                            <p className="font-bold text-slate-900">{item.name}</p>
+                            <p className="text-[10px] text-slate-400 mt-1 capitalize">{item.type === 'product' ? 'Product' : 'Professional session inclusive of all taxes.'}</p>
+                          </td>
+                          <td className="px-6 py-5 text-center">MYR {item.price}</td>
+                          <td className="px-6 py-5 text-center">{item.quantity}</td>
+                          <td className="px-6 py-5 text-center">0%</td>
+                          <td className="px-6 py-5 text-center">-</td>
+                          <td className="px-6 py-5 text-right font-bold text-slate-900">MYR {(item.price * item.quantity).toFixed(2)}</td>
+                        </tr>
+                      ));
+                    })()}
                   </tbody>
                 </table>
               </div>
