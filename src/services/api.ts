@@ -347,6 +347,12 @@ export const bookingsAPI = {
         });
     },
 
+    async settleDeposit(id: string) {
+        return await fetchWithAuth(`/bookings/${id}/settle-deposit`, {
+            method: 'PUT'
+        });
+    },
+
     async update(id: string, bookingData: any) {
         const data = await fetchWithAuth(`/bookings/${id}`, {
             method: 'PUT',

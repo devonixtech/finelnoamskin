@@ -22,6 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { useSalon } from "@/hooks/useSalon";
@@ -59,18 +65,21 @@ interface Invoice {
   service: string;
   amount: number;
   date: string;
-  status: 'paid' | 'pending' | 'cash';
+  status: 'paid' | 'pending' | 'cash' | 'deposit';
   paymentMethod: string;
   time: string;
   customerEmail?: string;
   customerPhone?: string;
   discount: number;
   subtotal: number;
+  totalValue?: number;
   coinsUsed: number;
   loyaltyPointsUsed: number;
   coinValue: number;
   type: 'appointment' | 'product';
   invoiceUrl?: string;
+  notes?: string;
+  staff?: string;
 }
 
 interface PaymentStats {
@@ -146,6 +155,26 @@ const BillingPage = () => {
     }, 300);
   };
 
+  const handleCreateRemainingInvoice = async (inv: Invoice) => {
+    try {
+      setLoading(true);
+      await api.bookings.settleDeposit(inv.bookingId);
+      toast({
+        title: "Success",
+        description: "Remaining amount invoice generated successfully.",
+      });
+      fetchInvoices();
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to create invoice.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSendNotify = async (type: 'sms' | 'whatsapp') => {
     if (!selectedInvoice) return;
 
@@ -212,32 +241,48 @@ const BillingPage = () => {
       const invoicesData: Invoice[] = bookingsArray.map((booking: any, index: number) => {
         const pp = booking.platformPayments?.[0];
         const invoiceNumber = pp?.invoice_number || `L-INV-${String(index + 1).padStart(4, '0')}`;
+        
+        const actualPaid = Number(booking.price_paid || 0);
+        let totalValue = Number(booking.service?.price || 0);
+
+        if (booking.notes && booking.notes.includes('ITEMS: {')) {
+          try {
+            const jsonStr = booking.notes.substring(booking.notes.indexOf('ITEMS: ') + 7);
+            const parsed = JSON.parse(jsonStr);
+            if (parsed.items && Array.isArray(parsed.items)) {
+              totalValue = parsed.items.reduce((sum: number, item: any) => sum + (Number(item.price) * Number(item.quantity)), 0);
+            }
+          } catch (e) {}
+        }
+
         const isPaid = booking.status === 'completed';
-        const iscash = !isPaid && new Date(booking.booking_date) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const customerName = booking.customer_name || 'Walk-in';
+        const isDeposit = booking.status === 'confirmed' && actualPaid > 0 && actualPaid < totalValue;
+        const iscash = !isPaid && !isDeposit && new Date(booking.booking_date) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const customerName = booking.customer_name || booking.user?.profile?.full_name || 'Walk-in';
 
         return {
           id: invoiceNumber,
           bookingId: booking.id,
           customer: customerName,
           customerId: booking.user_id,
-          service: booking.service_name || 'Service',
-          amount: Number(booking.amount_paid || booking.price || 0),
+          service: booking.service_name || booking.service?.name || 'Service',
+          amount: actualPaid || totalValue, // Show what was paid, or what is due
           date: booking.booking_date,
-          status: iscash ? 'cash' : isPaid ? 'paid' : 'pending',
+          status: isDeposit ? 'deposit' : iscash ? 'cash' : isPaid ? 'paid' : 'pending',
           paymentMethod: pp?.payment_method || booking.payment_method || 'Cash',
           time: booking.booking_time || '00:00',
-          customerEmail: pp?.invoice_url ? '' : (booking.customer_email || ''),
-          customerPhone: booking.customer_phone || '',
+          customerEmail: pp?.invoice_url ? '' : (booking.customer_email || booking.user?.email || ''),
+          customerPhone: booking.customer_phone || booking.user?.profile?.phone || '',
           discount: Number(booking.discount_amount || 0),
-          subtotal: Number(booking.amount_paid || booking.price || 0), // Base subtotal on actual paid amount before discounts
+          subtotal: actualPaid || totalValue, // base subtotal for the display
+          totalValue: totalValue, // keeping track of the actual total for later calculations
           coinsUsed: Number(booking.coins_used || 0),
           loyaltyPointsUsed: Number(booking.loyalty_points_used || 0),
           coinValue: Number(booking.coin_currency_value || 0) * (Number(booking.coins_used || 0) + Number(booking.loyalty_points_used || 0)),
           type: 'appointment',
           invoiceUrl: pp?.invoice_url || `${window.location.origin}/invoices/${booking.id}`,
           notes: booking.notes,
-          staff: booking.staff_name || '-',
+          staff: booking.staff_name || booking.staff?.display_name || '-',
         };
       });
 
@@ -353,6 +398,8 @@ const BillingPage = () => {
         return <Badge className="bg-amber-100 text-amber-700 border-0 font-bold px-3 uppercase text-[9px] tracking-wider">Pending</Badge>;
       case "cash":
         return <Badge className="bg-red-100 text-red-700 border-0 font-bold px-3 uppercase text-[9px] tracking-wider">cash</Badge>;
+      case "deposit":
+        return <Badge className="bg-blue-100 text-blue-700 border-0 font-bold px-3 uppercase text-[9px] tracking-wider">Deposit</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -473,25 +520,46 @@ const BillingPage = () => {
                         {getStatusBadge(inv.status)}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-xl h-9 w-9 bg-card shadow-sm border border-border/50 hover:bg-muted"
-                          onClick={() => {
-                            setSelectedInvoice(inv);
-                            setShowDetailDialog(true);
-                          }}
-                        >
-                          <Eye className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-xl h-9 w-9 bg-card shadow-sm border border-border/50 hover:text-accent hover:bg-muted"
-                          onClick={() => handleDirectDownload(inv)}
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
+                        {inv.status === 'deposit' ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-xl h-9 w-9 bg-card shadow-sm border border-border/50 hover:bg-muted"
+                              >
+                                <MoreHorizontal className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleCreateRemainingInvoice(inv)}>
+                                Create remaining amount invoice
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="rounded-xl h-9 w-9 bg-card shadow-sm border border-border/50 hover:bg-muted"
+                              onClick={() => {
+                                setSelectedInvoice(inv);
+                                setShowDetailDialog(true);
+                              }}
+                            >
+                              <Eye className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="rounded-xl h-9 w-9 bg-card shadow-sm border border-border/50 hover:text-accent hover:bg-muted"
+                              onClick={() => handleDirectDownload(inv)}
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
