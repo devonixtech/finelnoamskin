@@ -254,7 +254,14 @@ const BillingPage = () => {
       });
       setCustomers(Array.from(customerMap.values()));
 
-      setInvoices(invoicesData);
+      // Sort invoices by creation date (newest first) or booking date
+      const sortedInvoices = invoicesData.sort((a, b) => {
+        const dateA = new Date(bookingsArray.find((bk: any) => bk.id === a.bookingId)?.created_at || a.date);
+        const dateB = new Date(bookingsArray.find((bk: any) => bk.id === b.bookingId)?.created_at || b.date);
+        return dateB.getTime() - dateA.getTime();
+      });
+
+      setInvoices(sortedInvoices);
 
       const todayStr = format(new Date(), "yyyy-MM-dd");
       const monthStr = format(new Date(), "yyyy-MM");
