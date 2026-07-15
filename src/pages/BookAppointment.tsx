@@ -190,6 +190,17 @@ const BookAppointment = () => {
   }, [user, loading, salonId, navigate]);
 
   useEffect(() => {
+    if (user) {
+      setMemberDetails(prev => ({
+        ...prev,
+        fullName: prev.fullName || user.full_name || "",
+        email: prev.email || user.email || "",
+        phone: prev.phone || user.phone || ""
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
     const fetchBookedSlots = async () => {
       if (!salonId || !selectedDate) return;
       setLoadingSlots(true);
@@ -246,15 +257,6 @@ const BookAppointment = () => {
 
       const offersData = await api.offers.getBySalon(salonId);
       setSalonOffers(offersData || []);
-
-      // Pre-fill member details from user profile
-      if (user) {
-        setMemberDetails({
-          fullName: user.full_name || "",
-          email: user.email || "",
-          phone: user.phone || ""
-        });
-      }
 
       const serviceId = searchParams.get("serviceId");
       if (serviceId && servicesData) {
