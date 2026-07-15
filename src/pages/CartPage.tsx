@@ -17,7 +17,7 @@ const CartPage = () => {
  React.useEffect(() => {
     const loadSettings = async () => {
         try {
-            const data = await api.admin.getSettings();
+            const data = await api.admin.getPlatformSettings();
             if (data) {
                 setPlatformSettings({
                     shipping_fee: Number(data.shipping_fee ?? 15),

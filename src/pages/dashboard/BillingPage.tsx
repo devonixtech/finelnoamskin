@@ -106,6 +106,7 @@ const BillingPage = () => {
   const [creating, setCreating] = useState(false);
   const [services, setServices] = useState<Array<{ id: string; name: string; price: number }>>([]);
   const [products, setProducts] = useState<Array<{ id: string; name: string; price: number }>>([]);
+  const [customers, setCustomers] = useState<Array<{ id: string; name: string; phone: string }>>([]);
   type InvoiceItem = { type: 'service' | 'product', id?: string, name: string, price: number, quantity: number };
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
   const [newInvoice, setNewInvoice] = useState({
@@ -240,6 +241,19 @@ const BillingPage = () => {
         };
       });
 
+      // Extract unique customers
+      const customerMap = new Map();
+      bookingsArray.forEach((b: any) => {
+        if (b.user_id && !customerMap.has(b.user_id)) {
+          customerMap.set(b.user_id, {
+            id: b.user_id,
+            name: b.customer_name || b.user?.profile?.full_name || 'Walk-in Customer',
+            phone: b.customer_phone || ''
+          });
+        }
+      });
+      setCustomers(Array.from(customerMap.values()));
+
       setInvoices(invoicesData);
 
       const todayStr = format(new Date(), "yyyy-MM-dd");
@@ -300,6 +314,7 @@ const BillingPage = () => {
       
       await api.bookings.create({
         salon_id: currentSalon.id,
+        user_id: newInvoice.customerId || undefined,
         service_id: mainService.id || 'custom-item',
         booking_date: newInvoice.date,
         booking_time: newInvoice.time,
@@ -653,6 +668,31 @@ const BillingPage = () => {
               <DialogDescription className="font-medium">Direct entry for walk-in payments.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
+              <div className="space-y-4 mb-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Select Existing Customer</Label>
+                  <Select onValueChange={(val) => {
+                    if (val === 'walkin') {
+                       setNewInvoice({ ...newInvoice, customerId: "", notes: "", guestPhone: "" });
+                    } else {
+                       const c = customers.find(x => x.id === val);
+                       if (c) {
+                         setNewInvoice({ ...newInvoice, customerId: c.id, notes: c.name, guestPhone: c.phone });
+                       }
+                    }
+                  }}>
+                    <SelectTrigger className="bg-secondary/30 border-none h-12 rounded-xl">
+                      <SelectValue placeholder="Select or walk-in..." />
+                    </SelectTrigger>
+                    <SelectContent side="bottom" sideOffset={4}>
+                      <SelectItem value="walkin">Walk-in Guest</SelectItem>
+                      {customers.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.name} {c.phone ? `(${c.phone})` : ''}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Guest Name</Label>

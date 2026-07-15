@@ -464,6 +464,17 @@ export const adminAPI = {
         return toArray(data, 'payments');
     },
 
+    async getPlatformSettings() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/settings`);
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (e) {
+            console.error('Failed to fetch public settings', e);
+            return null;
+        }
+    },
+
     async getSettings() {
         return await fetchWithAuth('/admin/settings');
     },
