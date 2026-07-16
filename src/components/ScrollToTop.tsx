@@ -13,6 +13,7 @@ export default function ScrollToTop() {
         // Also reset any inner scrollable containers (dashboard main area, mobile layout, etc.)
         const scrollTargets = [
             document.getElementById('app-routes-container'),
+            document.getElementById('mobile-main-content'),
             document.querySelector('main'),
             document.querySelector('.overflow-y-auto'),
             document.querySelector('[data-scroll-container]'),

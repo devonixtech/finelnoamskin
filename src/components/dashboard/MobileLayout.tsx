@@ -286,7 +286,7 @@ export const MobileLayout = ({
       </header>
 
       {/* Page Content - Full Screen */}
-      <main className="flex-1 overflow-auto">
+      <main id="mobile-main-content" className="flex-1 overflow-auto">
         <div className="p-4 pb-safe">
           {children}
         </div>
