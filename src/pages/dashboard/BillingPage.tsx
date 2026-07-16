@@ -292,19 +292,17 @@ const BillingPage = () => {
           staff: booking.staff_name || booking.staff?.display_name || '-',
         };
       });
-
-      // Extract unique customers
-      const customerMap = new Map();
-      bookingsArray.forEach((b: any) => {
-        if (b.user_id && !customerMap.has(b.user_id)) {
-          customerMap.set(b.user_id, {
-            id: b.user_id,
-            name: b.customer_name || b.user?.profile?.full_name || 'Walk-in Customer',
-            phone: b.customer_phone || ''
-          });
-        }
       });
-      setCustomers(Array.from(customerMap.values()));
+
+      // Extract unique customers via the new Directory API
+      try {
+        const dirRes = await api.customerRecords.getDirectory(currentSalon.id);
+        if (dirRes.customers) {
+          setCustomers(dirRes.customers);
+        }
+      } catch (err) {
+        console.error("Failed to load salon directory", err);
+      }
 
       // Sort invoices by creation date (newest first) or booking date
       const sortedInvoices = invoicesData.sort((a, b) => {
@@ -371,9 +369,26 @@ const BillingPage = () => {
       const mainService = invoiceItems.find(i => i.type === 'service') || invoiceItems[0];
       const itemsPayload = JSON.stringify({ items: invoiceItems });
       
+      let finalCustomerId = newInvoice.customerId;
+
+      // If it's a new walk-in (no existing customer ID selected), create one in the directory first!
+      if (!finalCustomerId && newInvoice.notes) {
+        try {
+          const newCustRes = await api.customerRecords.addCustomer(currentSalon.id, {
+            name: newInvoice.notes,
+            phone: newInvoice.guestPhone
+          });
+          if (newCustRes.success && newCustRes.customer) {
+            finalCustomerId = newCustRes.customer.id;
+          }
+        } catch (e) {
+          console.warn("Failed to create shadow customer, proceeding as pure walk-in", e);
+        }
+      }
+      
       await api.bookings.create({
         salon_id: currentSalon.id,
-        user_id: newInvoice.customerId || undefined,
+        user_id: finalCustomerId || undefined,
         service_id: mainService.id || 'custom-item',
         booking_date: newInvoice.date,
         booking_time: newInvoice.time,

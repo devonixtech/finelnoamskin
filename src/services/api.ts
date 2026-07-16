@@ -886,7 +886,15 @@ export const api = {
             return fetchWithAuth(url);
         },
         getTransformations: () => fetchWithAuth('/customer_records/transformations'),
-        getGlobalProfile: (userId: string) => fetchWithAuth(`/customer_records/${userId}/profile`)
+        getGlobalProfile: (userId: string) => fetchWithAuth(`/customer_records/${userId}/profile`),
+        
+        // Directory APIs
+        getDirectory: (salonId: string) => fetchWithAuth(`/customer_records/salon/${salonId}/directory`),
+        addCustomer: (salonId: string, data: { name: string; phone?: string; email?: string }) => 
+            fetchWithAuth(`/customer_records/salon/${salonId}/directory`, {
+                method: 'POST',
+                body: JSON.stringify(data),
+            }),
     },
     reminders: {
         create: (data: any) => fetchWithAuth('/reminders', {
