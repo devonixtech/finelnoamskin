@@ -27,6 +27,7 @@ const CheckoutPage = () => {
 
     const [formData, setFormData] = useState({
         email: "",
+        phone: "",
         firstName: "",
         lastName: "",
         address: "",
@@ -46,6 +47,7 @@ const CheckoutPage = () => {
             setFormData(prev => ({
                 ...prev,
                 email: user.email || "",
+                phone: user.phone || "",
                 firstName: user.full_name?.split(' ')[0] || "",
                 lastName: user.full_name?.split(' ').slice(1).join(' ') || "",
             }));
@@ -289,8 +291,15 @@ const CheckoutPage = () => {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    placeholder="Email or mobile phone number"
+                                    placeholder="Email address"
                                     className="h-14 border-slate-200 rounded-lg focus:ring-0 focus:border-[#1A1A1A] transition-all bg-white/50"
+                                />
+                                <Input
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                    placeholder="Mobile phone number"
+                                    className="h-14 border-slate-200 rounded-lg focus:ring-0 focus:border-[#1A1A1A] transition-all bg-white/50 mt-4"
                                 />
                                 <label className="flex items-center gap-3 mt-4 cursor-pointer group">
                                     <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#1A1A1A] focus:ring-0" />

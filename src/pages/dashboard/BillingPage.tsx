@@ -265,7 +265,12 @@ const BillingPage = () => {
         const isPaid = booking.status === 'completed';
         const isDeposit = booking.status === 'confirmed' && actualPaid > 0 && actualPaid < finalPayable;
         const iscash = !isPaid && !isDeposit && new Date(booking.booking_date) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const customerName = booking.customer_name || booking.user?.profile?.full_name || 'Walk-in';
+        
+        const guestNameMatch = booking.notes?.match(/\[GUEST:\s*(.*?)\s*\|/);
+        const guestPhoneMatch = booking.notes?.match(/\|\s*(.*?)\s*\]/);
+        
+        const customerName = (guestNameMatch ? guestNameMatch[1] : null) || booking.customer_name || booking.user?.profile?.full_name || 'Walk-in';
+        const customerPhone = (guestPhoneMatch ? guestPhoneMatch[1] : null) || booking.customer_phone || booking.user?.profile?.phone || '';
 
         return {
           id: invoiceNumber,
@@ -279,7 +284,7 @@ const BillingPage = () => {
           paymentMethod: pp?.payment_method || booking.payment_method || 'Cash',
           time: booking.booking_time || '00:00',
           customerEmail: pp?.invoice_url ? '' : (booking.customer_email || booking.user?.email || ''),
-          customerPhone: booking.customer_phone || booking.user?.profile?.phone || '',
+          customerPhone: customerPhone,
           discount,
           subtotal: actualPaid || totalValue, // base subtotal for the display
           totalValue, // keeping track of the actual total for later calculations
