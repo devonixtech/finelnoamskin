@@ -297,7 +297,6 @@ const BillingPage = () => {
           staff: booking.staff_name || booking.staff?.display_name || '-',
         };
       });
-      });
 
       // Extract unique customers via the new Directory API
       try {
