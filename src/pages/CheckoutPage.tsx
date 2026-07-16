@@ -407,22 +407,7 @@ const CheckoutPage = () => {
                                 </div>
                             )}
 
-                            {!showPayment ? (
-                                <Button
-                                    onClick={handleProceedToPayment}
-                                    disabled={loading}
-                                    className="w-full h-16 bg-[#1A1A1A] hover:bg-black text-white rounded-lg mt-12 text-lg font-bold transition-all relative"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                                            Redirecting to ToyyibPay...
-                                        </>
-                                    ) : (
-                                        finalTotal > 0 ? 'Pay Now with ToyyibPay' : 'Complete Order'
-                                    )}
-                                </Button>
-                            ) : null}
+
 
                             <footer className="mt-20 py-8 border-t border-slate-200 flex flex-wrap gap-6">
                                 {['Refund policy', 'Shipping policy', 'Privacy policy', 'Terms of service'].map(item => (
@@ -490,6 +475,24 @@ const CheckoutPage = () => {
                                     <span className="text-2xl font-black text-[#1A1A1A]">MYR {finalTotal.toFixed(2)}</span>
                                 </div>
                             </div>
+
+                            {/* Payment Button */}
+                            {!showPayment ? (
+                                <Button
+                                    onClick={handleProceedToPayment}
+                                    disabled={loading}
+                                    className="w-full h-16 bg-[#1A1A1A] hover:bg-black text-white rounded-lg mt-8 text-lg font-bold transition-all relative mr-4"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                                            Redirecting to ToyyibPay...
+                                        </>
+                                    ) : (
+                                        finalTotal > 0 ? 'Pay Now with ToyyibPay' : 'Complete Order'
+                                    )}
+                                </Button>
+                            ) : null}
                         </div>
                     </div>
 
