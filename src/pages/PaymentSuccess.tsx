@@ -73,7 +73,7 @@ const PaymentSuccess = () => {
                             </Button>
                         ) : (
                             <Button asChild className="h-14 px-8 rounded-full bg-[#1A1A1A] text-white hover:bg-black font-bold text-lg">
-                                <Link to={type === 'order' ? "/checkout" : "/my-bookings"} className="flex items-center gap-2">
+                                <Link to={type === 'order' ? "/checkout" : "/book"} className="flex items-center gap-2">
                                     Try Again <RefreshCw className="w-5 h-5" />
                                 </Link>
                             </Button>
