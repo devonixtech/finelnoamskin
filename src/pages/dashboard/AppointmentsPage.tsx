@@ -773,7 +773,7 @@ export default function AppointmentsPage() {
             selectedDate={selectedDate}
             onDateSelect={(d) => {
               setSelectedDate(d);
-              if (viewMode === "all") setViewMode("day");
+              setViewMode("day");
             }}
             onBookingClick={(booking) => {
               setSelectedDate(new Date(booking.booking_date));
@@ -807,8 +807,8 @@ export default function AppointmentsPage() {
                   {weekDays.map((day) => (
                     <button
                       key={day.toISOString()}
-                      onClick={() => setSelectedDate(day)}
-                      className={`py-4 text-center transition-colors ${isSameDay(day, selectedDate) ? "bg-accent/5" : "hover:bg-secondary/20"}`}
+                      onClick={() => { setSelectedDate(day); setViewMode("day"); }}
+                      className={`py-4 text-center transition-colors ${isSameDay(day, selectedDate) && viewMode === "day" ? "bg-accent/5" : "hover:bg-secondary/20"}`}
                     >
                       <p className={`text-[10px] font-black uppercase tracking-wider ${isSameDay(day, selectedDate) ? "text-accent" : "text-muted-foreground"}`}>
                         {format(day, "EEE")}
