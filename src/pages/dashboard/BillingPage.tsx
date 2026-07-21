@@ -1249,14 +1249,20 @@ const BillingPage = () => {
                   )}
                   {newInvoice.discount > 0 && (
                     <div className="flex justify-between font-medium text-amber-600">
-                      <span>Discount</span>
-                      <span>- MYR {selectedInvoice.discount.toFixed(2)}</span>
+                      <span>Member Discount</span>
+                      <span>- MYR {newInvoice.discount.toFixed(2)}</span>
                     </div>
                   )}
-                  {(selectedInvoice.coinsUsed > 0 || selectedInvoice.loyaltyPointsUsed > 0) && (
-                    <div className="flex justify-between font-medium text-blue-600">
-                      <span>Points ({selectedInvoice.coinsUsed + selectedInvoice.loyaltyPointsUsed})</span>
-                      <span>- MYR {selectedInvoice.coinValue.toFixed(2)}</span>
+                  {newInvoice.promoDiscount > 0 && (
+                    <div className="flex justify-between font-medium text-green-600">
+                      <span>Coupon ({newInvoice.promoCode})</span>
+                      <span>- MYR {newInvoice.promoDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {pointsDiscount > 0 && (
+                    <div className="flex justify-between font-medium text-purple-600">
+                      <span>Points Redeemed ({newInvoice.pointsUsed} pts)</span>
+                      <span>- MYR {pointsDiscount.toFixed(2)}</span>
                     </div>
                   )}
                   <div className="h-px bg-slate-100 my-2" />
