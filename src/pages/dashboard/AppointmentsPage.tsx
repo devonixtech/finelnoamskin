@@ -497,10 +497,16 @@ export default function AppointmentsPage() {
 
     const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
     
-    // Check if the booking matches the selected date
-    const bookingDateStr = format(new Date(booking.booking_date), 'yyyy-MM-dd');
-    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
-    const matchesDate = bookingDateStr === selectedDateStr;
+    // Check if the booking matches the selected date/week depending on viewMode
+    let matchesDate = true;
+    const bDate = new Date(booking.booking_date);
+    if (viewMode === "day") {
+      matchesDate = format(bDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
+    } else if (viewMode === "week") {
+      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
+      const weekEnd = addDays(weekStart, 6);
+      matchesDate = bDate >= weekStart && bDate <= weekEnd;
+    }
 
     return matchesSearch && matchesStatus && matchesDate;
   });
