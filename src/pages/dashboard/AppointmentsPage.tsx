@@ -504,8 +504,8 @@ export default function AppointmentsPage() {
       matchesDate = format(bDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
     } else if (viewMode === "week") {
       const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
-      const weekEnd = addDays(weekStart, 6);
-      matchesDate = bDate >= weekStart && bDate <= weekEnd;
+      const nextWeekStart = addDays(weekStart, 7);
+      matchesDate = bDate >= weekStart && bDate < nextWeekStart;
     }
 
     return matchesSearch && matchesStatus && matchesDate;
