@@ -137,7 +137,7 @@ const NewsletterPopup = () => {
                                         className="flex items-center justify-center gap-2 w-full h-12 bg-black hover:bg-black/90 text-white font-semibold rounded-full uppercase transition-all"
                                     >
                                         <Gift className="w-4 h-4" />
-                                        Claim My RM50
+                                        Sign Up To Auto-Claim RM50
                                     </a>
 
                                 </div>

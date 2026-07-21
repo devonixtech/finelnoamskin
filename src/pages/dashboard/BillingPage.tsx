@@ -739,7 +739,7 @@ const BillingPage = () => {
                       </div>
                       {selectedInvoice.discount > 0 && (
                         <div className="flex justify-between font-medium text-amber-600">
-                          <span>Coupons/Discount</span>
+                          <span>{selectedInvoice.discount === 50 ? 'First-Time Member Promo' : 'Coupons/Discount'}</span>
                           <span>- MYR {selectedInvoice.discount.toFixed(2)}</span>
                         </div>
                       )}
