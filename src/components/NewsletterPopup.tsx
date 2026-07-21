@@ -94,7 +94,7 @@ const NewsletterPopup = () => {
                                         Enjoy RM50 OFF Your First Visit
                                     </h2>
                                     <p className="text-gray-600 text-sm md:text-lg leading-relaxed">
-                                        Join our membership and receive exclusive reward and special member offers.
+                                        Join our membership and your RM50 discount will be automatically applied to your first invoice!
                                     </p>
                                 </div>
 

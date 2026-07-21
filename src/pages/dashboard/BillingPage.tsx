@@ -120,7 +120,7 @@ const BillingPage = () => {
   const [creating, setCreating] = useState(false);
   const [services, setServices] = useState<Array<{ id: string; name: string; price: number }>>([]);
   const [products, setProducts] = useState<Array<{ id: string; name: string; price: number }>>([]);
-  const [customers, setCustomers] = useState<Array<{ id: string; name: string; phone: string }>>([]);
+  const [customers, setCustomers] = useState<Array<{ id: string; name: string; phone: string; is_member?: boolean; booking_count?: number }>>([]);
   type InvoiceItem = { type: 'service' | 'product', id?: string, name: string, price: number, quantity: number };
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
   const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
@@ -132,7 +132,8 @@ const BillingPage = () => {
     status: "paid" as 'paid' | 'pending',
     notes: "",
     guestPhone: "",
-    guestEmail: ""
+    guestEmail: "",
+    discount: 0
   });
 
   const computedTotalAmount = invoiceItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -398,9 +399,10 @@ const BillingPage = () => {
       }
       
       await api.bookings.create({
+        user_id: finalCustomerId || currentSalon.id,
         salon_id: currentSalon.id,
-        user_id: finalCustomerId || undefined,
-        service_id: mainService.id || 'custom-item',
+        total_amount: Math.max(0, computedTotalAmount - (newInvoice.discount || 0)),
+        discount_amount: newInvoice.discount || 0,
         booking_date: newInvoice.date,
         booking_time: newInvoice.time,
         price_paid: computedTotalAmount,
@@ -804,7 +806,7 @@ const BillingPage = () => {
                             <CommandItem
                               value="walkin"
                               onSelect={() => {
-                                setNewInvoice({ ...newInvoice, customerId: "walkin", notes: "", guestPhone: "" });
+                                setNewInvoice({ ...newInvoice, customerId: "walkin", notes: "", guestPhone: "", discount: 0 });
                                 setCustomerSearchOpen(false);
                               }}
                               className="cursor-pointer"
@@ -822,7 +824,15 @@ const BillingPage = () => {
                                 key={c.id}
                                 value={`${c.name} ${c.phone || ""}`}
                                 onSelect={() => {
-                                  setNewInvoice({ ...newInvoice, customerId: c.id, notes: c.name, guestPhone: c.phone || "" });
+                                  let appliedDiscount = 0;
+                                  if (c.is_member && c.booking_count === 0) {
+                                    appliedDiscount = 50;
+                                    toast({
+                                      title: "New Member Promo Applied!",
+                                      description: "RM50 discount has been automatically applied to this first-time member's invoice.",
+                                    });
+                                  }
+                                  setNewInvoice({ ...newInvoice, customerId: c.id, notes: c.name, guestPhone: c.phone || "", discount: appliedDiscount });
                                   setCustomerSearchOpen(false);
                                 }}
                                 className="cursor-pointer"
@@ -907,9 +917,15 @@ const BillingPage = () => {
                   </Select>
                 </div>
 
+                {newInvoice.discount > 0 && (
+                  <div className="flex justify-between items-center bg-green-500/10 text-green-700 p-3 rounded-xl mb-2">
+                    <span className="font-bold text-sm">New Member Promo (RM50)</span>
+                    <span className="font-black text-lg">- MYR {newInvoice.discount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center bg-accent/10 p-3 rounded-xl">
                   <span className="font-bold">Total Amount</span>
-                  <span className="font-black text-accent text-lg">MYR {computedTotalAmount.toFixed(2)}</span>
+                  <span className="font-black text-accent text-lg">MYR {Math.max(0, computedTotalAmount - (newInvoice.discount || 0)).toFixed(2)}</span>
                 </div>
               </div>
             </div>
