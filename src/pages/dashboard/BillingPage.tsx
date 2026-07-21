@@ -430,6 +430,7 @@ const BillingPage = () => {
         await api.bookings.create({
           user_id: finalCustomerId || currentSalon.id,
           salon_id: currentSalon.id,
+          service_id: invoiceItems.find(i => i.type === 'service')?.id || "manual-billing-no-service",
           total_amount: finalTotalAmount,
           discount_amount: (newInvoice.discount || 0) + (newInvoice.promoDiscount || 0),
           coupon_code: newInvoice.promoCode || undefined,
