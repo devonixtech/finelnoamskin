@@ -827,7 +827,7 @@ const BillingPage = () => {
 
         {/* Create Invoice Dialog */}
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogContent className="max-w-md rounded-3xl border-none p-6">
+          <DialogContent className="max-w-md rounded-3xl border-none p-6 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black">Manual Billing</DialogTitle>
               <DialogDescription className="font-medium">Direct entry for walk-in payments.</DialogDescription>
