@@ -916,7 +916,8 @@ const BillingPage = () => {
                       onValueChange={(val) => {
                         const b = pendingCustomerBookings.find(bk => bk.bookingId === val);
                         if (b) {
-                          setNewInvoice({ ...newInvoice, existingBookingId: val, depositPaid: b.amount });
+                          const actualDeposit = b.status === 'deposit' ? b.amount : 0;
+                          setNewInvoice({ ...newInvoice, existingBookingId: val, depositPaid: actualDeposit });
                           // Try to pre-fill the service if we can find it
                           const matchingService = services.find(s => s.name === b.service);
                           if (matchingService) {
@@ -934,7 +935,7 @@ const BillingPage = () => {
                         <SelectItem value="none">Create New Invoice (No Booking)</SelectItem>
                         {pendingCustomerBookings.map(b => (
                           <SelectItem key={b.bookingId} value={b.bookingId}>
-                            {b.date} - {b.service} (Deposit Paid: MYR {b.amount})
+                            {b.date} - {b.service} {b.status === 'deposit' ? `(Deposit Paid: MYR ${b.amount})` : '(No Deposit)'}
                           </SelectItem>
                         ))}
                       </SelectContent>
