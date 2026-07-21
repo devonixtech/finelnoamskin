@@ -138,8 +138,13 @@ const BillingPage = () => {
     discount: 0,
     promoCode: "",
     promoDiscount: 0,
-    pointsUsed: 0
+    promoDiscount: 0,
+    pointsUsed: 0,
+    existingBookingId: "",
+    depositPaid: 0
   });
+
+  const pendingCustomerBookings = invoices.filter(inv => inv.customerId === newInvoice.customerId && (inv.status === 'pending' || inv.status === 'deposit'));
 
   const computedTotalAmount = invoiceItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   
@@ -409,23 +414,37 @@ const BillingPage = () => {
         }
       }
       
-      await api.bookings.create({
-        user_id: finalCustomerId || currentSalon.id,
-        salon_id: currentSalon.id,
-        total_amount: finalTotalAmount,
-        discount_amount: (newInvoice.discount || 0) + (newInvoice.promoDiscount || 0),
-        coupon_code: newInvoice.promoCode || undefined,
-        explicit_loyalty_points: newInvoice.pointsUsed || 0,
-        explicit_loyalty_discount: pointsDiscount || 0,
-        booking_date: newInvoice.date,
-        booking_time: newInvoice.time,
-        price_paid: Math.max(0, computedTotalAmount - (newInvoice.discount || 0) - (newInvoice.promoDiscount || 0)),
-        status: newInvoice.status === 'paid' ? 'completed' : 'confirmed',
-        payment_method: newInvoice.paymentMethod,
-        notes: `[GUEST: ${newInvoice.notes || 'Walk-in'} | ${newInvoice.guestPhone || ''} ] ITEMS: ${itemsPayload}`,
-      });
+      if (newInvoice.existingBookingId) {
+        // SETTLE EXISTING BOOKING
+        await api.bookings.settleManualInvoice(newInvoice.existingBookingId, {
+          amount_paid: Math.max(0, computedTotalAmount - newInvoice.depositPaid - (newInvoice.discount || 0) - (newInvoice.promoDiscount || 0)),
+          discount_amount: (newInvoice.discount || 0) + (newInvoice.promoDiscount || 0),
+          coupon_code: newInvoice.promoCode || undefined,
+          explicit_loyalty_points: newInvoice.pointsUsed || 0,
+          explicit_loyalty_discount: pointsDiscount || 0,
+          payment_method: newInvoice.paymentMethod,
+          notes: `[GUEST: ${newInvoice.notes || 'Walk-in'} | ${newInvoice.guestPhone || ''} ] ITEMS: ${itemsPayload}`,
+        });
+      } else {
+        // CREATE NEW BOOKING
+        await api.bookings.create({
+          user_id: finalCustomerId || currentSalon.id,
+          salon_id: currentSalon.id,
+          total_amount: finalTotalAmount,
+          discount_amount: (newInvoice.discount || 0) + (newInvoice.promoDiscount || 0),
+          coupon_code: newInvoice.promoCode || undefined,
+          explicit_loyalty_points: newInvoice.pointsUsed || 0,
+          explicit_loyalty_discount: pointsDiscount || 0,
+          booking_date: newInvoice.date,
+          booking_time: newInvoice.time,
+          price_paid: Math.max(0, computedTotalAmount - newInvoice.depositPaid - (newInvoice.discount || 0) - (newInvoice.promoDiscount || 0)),
+          status: newInvoice.status === 'paid' ? 'completed' : 'confirmed',
+          payment_method: newInvoice.paymentMethod,
+          notes: `[GUEST: ${newInvoice.notes || 'Walk-in'} | ${newInvoice.guestPhone || ''} ] ITEMS: ${itemsPayload}`,
+        });
+      }
 
-      toast({ title: "Invoice Created", description: "Successfully added to ledger" });
+      toast({ title: "Invoice Generated", description: "Successfully updated ledger" });
       setShowCreateDialog(false);
       fetchInvoices();
     } catch (error: any) {
@@ -866,6 +885,40 @@ const BillingPage = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
+                
+                {pendingCustomerBookings.length > 0 && (
+                  <div className="space-y-2 mt-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                    <Label className="text-[10px] font-black uppercase text-blue-800 ml-1">Settle Existing Booking (Optional)</Label>
+                    <Select 
+                      value={newInvoice.existingBookingId} 
+                      onValueChange={(val) => {
+                        const b = pendingCustomerBookings.find(bk => bk.bookingId === val);
+                        if (b) {
+                          setNewInvoice({ ...newInvoice, existingBookingId: val, depositPaid: b.amount });
+                          // Try to pre-fill the service if we can find it
+                          const matchingService = services.find(s => s.name === b.service);
+                          if (matchingService) {
+                            setInvoiceItems([{ type: 'service', id: matchingService.id, name: matchingService.name, price: Number(matchingService.price), quantity: 1 }]);
+                          }
+                        } else if (val === "none") {
+                          setNewInvoice({ ...newInvoice, existingBookingId: "", depositPaid: 0 });
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full bg-white border-blue-200">
+                        <SelectValue placeholder="Select a pending booking" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Create New Invoice (No Booking)</SelectItem>
+                        {pendingCustomerBookings.map(b => (
+                          <SelectItem key={b.bookingId} value={b.bookingId}>
+                            {b.date} - {b.service} (Deposit Paid: MYR {b.amount})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -1034,6 +1087,12 @@ const BillingPage = () => {
                   <span className="font-bold">Total Amount</span>
                   <span className="font-black text-accent text-lg">MYR {finalTotalAmount.toFixed(2)}</span>
                 </div>
+                <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                  <span className="text-lg font-bold text-slate-900">Total Due</span>
+                  <span className="text-lg font-bold text-slate-900">
+                    MYR {Math.max(0, computedTotalAmount - newInvoice.depositPaid - (newInvoice.discount || 0) - (newInvoice.promoDiscount || 0)).toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
             <DialogFooter>
@@ -1156,9 +1215,15 @@ const BillingPage = () => {
                 <div className="w-72 space-y-3">
                   <div className="flex justify-between font-medium text-slate-500">
                     <span>Subtotal</span>
-                    <span className="text-slate-700">MYR {selectedInvoice.subtotal.toFixed(2)}</span>
+                    <span>MYR {computedTotalAmount.toFixed(2)}</span>
                   </div>
-                  {selectedInvoice.discount > 0 && (
+                  {newInvoice.depositPaid > 0 && (
+                    <div className="flex justify-between font-medium text-blue-600">
+                      <span>Deposit Paid</span>
+                      <span>- MYR {newInvoice.depositPaid.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {newInvoice.discount > 0 && (
                     <div className="flex justify-between font-medium text-amber-600">
                       <span>Discount</span>
                       <span>- MYR {selectedInvoice.discount.toFixed(2)}</span>
