@@ -120,10 +120,12 @@ const BillingPage = () => {
   const [creating, setCreating] = useState(false);
   const [services, setServices] = useState<Array<{ id: string; name: string; price: number }>>([]);
   const [products, setProducts] = useState<Array<{ id: string; name: string; price: number }>>([]);
-  const [customers, setCustomers] = useState<Array<{ id: string; name: string; phone: string; is_member?: boolean; booking_count?: number }>>([]);
+  const [customers, setCustomers] = useState<Array<{ id: string; name: string; phone: string; is_member?: boolean; booking_count?: number; loyalty_points?: number }>>([]);
   type InvoiceItem = { type: 'service' | 'product', id?: string, name: string, price: number, quantity: number };
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
   const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+  const [promoCodeInput, setPromoCodeInput] = useState("");
+  const [promoCodeStatus, setPromoCodeStatus] = useState<"none"|"valid"|"invalid">("none");
   const [newInvoice, setNewInvoice] = useState({
     customerId: "",
     date: format(new Date(), "yyyy-MM-dd"),
@@ -133,12 +135,21 @@ const BillingPage = () => {
     notes: "",
     guestPhone: "",
     guestEmail: "",
-    discount: 0
+    discount: 0,
+    promoCode: "",
+    promoDiscount: 0,
+    pointsUsed: 0
   });
 
   const computedTotalAmount = invoiceItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-  // Selected Invoice Modal State
+  
+  // Calculate maximum points allowed (30% of computedTotalAmount)
+  const POINTS_CONVERSION_RATE = 0.05; // 100 points = RM5
+  const maxPointsAllowed = Math.floor((computedTotalAmount * 0.30) / POINTS_CONVERSION_RATE);
+  
+  const pointsDiscount = newInvoice.pointsUsed * POINTS_CONVERSION_RATE;
+  
+  const finalTotalAmount = Math.max(0, computedTotalAmount - (newInvoice.discount || 0) - (newInvoice.promoDiscount || 0) - pointsDiscount);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
 
@@ -401,8 +412,11 @@ const BillingPage = () => {
       await api.bookings.create({
         user_id: finalCustomerId || currentSalon.id,
         salon_id: currentSalon.id,
-        total_amount: Math.max(0, computedTotalAmount - (newInvoice.discount || 0)),
-        discount_amount: newInvoice.discount || 0,
+        total_amount: finalTotalAmount,
+        discount_amount: (newInvoice.discount || 0) + (newInvoice.promoDiscount || 0),
+        coupon_code: newInvoice.promoCode || undefined,
+        explicit_loyalty_points: newInvoice.pointsUsed || 0,
+        explicit_loyalty_discount: pointsDiscount || 0,
         booking_date: newInvoice.date,
         booking_time: newInvoice.time,
         price_paid: computedTotalAmount,
@@ -917,15 +931,108 @@ const BillingPage = () => {
                   </Select>
                 </div>
 
+                {/* Promo Code & Points Section */}
+                <div className="space-y-4 pt-4 border-t border-border">
+                  {/* Promo Code */}
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Promo Code</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter code"
+                        value={promoCodeInput}
+                        onChange={e => {
+                          setPromoCodeInput(e.target.value.toUpperCase());
+                          setPromoCodeStatus("none");
+                        }}
+                        className="bg-secondary/30 border-none h-10 rounded-xl"
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="h-10 rounded-xl px-4"
+                        disabled={!promoCodeInput || promoCodeStatus === "valid"}
+                        onClick={async () => {
+                          try {
+                            const res = await api.coupons.validate(promoCodeInput, currentSalon.id);
+                            if (res.valid) {
+                              setPromoCodeStatus("valid");
+                              let discount = 0;
+                              if (res.discount_type === 'percentage') {
+                                discount = computedTotalAmount * (res.discount_value / 100);
+                              } else {
+                                discount = res.discount_value;
+                              }
+                              setNewInvoice(prev => ({ ...prev, promoCode: promoCodeInput, promoDiscount: discount }));
+                              toast({ title: "Promo Applied", description: `${res.name} applied successfully.` });
+                            }
+                          } catch (error: any) {
+                            setPromoCodeStatus("invalid");
+                            toast({ title: "Invalid Code", description: error.message || "Invalid or expired promo code.", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Loyalty Points */}
+                  {newInvoice.customerId && newInvoice.customerId !== "walkin" && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center ml-1">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground">Loyalty Points</Label>
+                        <span className="text-[10px] font-bold text-accent">
+                          Available: {customers.find(c => c.id === newInvoice.customerId)?.loyalty_points || 0}
+                        </span>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          type="number"
+                          placeholder="Points to redeem"
+                          min="0"
+                          max={Math.min(customers.find(c => c.id === newInvoice.customerId)?.loyalty_points || 0, maxPointsAllowed)}
+                          value={newInvoice.pointsUsed || ""}
+                          onChange={e => {
+                            const val = parseInt(e.target.value) || 0;
+                            const maxAllowed = Math.min(customers.find(c => c.id === newInvoice.customerId)?.loyalty_points || 0, maxPointsAllowed);
+                            if (val > maxAllowed) {
+                               toast({ title: "Limit Reached", description: `You can only redeem up to ${maxAllowed} points for this invoice.`, variant: "destructive" });
+                               setNewInvoice(prev => ({ ...prev, pointsUsed: maxAllowed }));
+                            } else {
+                               setNewInvoice(prev => ({ ...prev, pointsUsed: val }));
+                            }
+                          }}
+                          className="bg-secondary/30 border-none h-10 rounded-xl"
+                        />
+                        <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                          = RM {pointsDiscount.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {newInvoice.discount > 0 && (
                   <div className="flex justify-between items-center bg-green-500/10 text-green-700 p-3 rounded-xl mb-2">
                     <span className="font-bold text-sm">New Member Promo (RM50)</span>
                     <span className="font-black text-lg">- MYR {newInvoice.discount.toFixed(2)}</span>
                   </div>
                 )}
+                {newInvoice.promoDiscount > 0 && (
+                  <div className="flex justify-between items-center bg-blue-500/10 text-blue-700 p-2 rounded-xl mb-1">
+                    <span className="font-bold text-xs">Promo Code ({newInvoice.promoCode})</span>
+                    <span className="font-black text-sm">- MYR {newInvoice.promoDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                {pointsDiscount > 0 && (
+                  <div className="flex justify-between items-center bg-purple-500/10 text-purple-700 p-2 rounded-xl mb-2">
+                    <span className="font-bold text-xs">Points Redeemed ({newInvoice.pointsUsed})</span>
+                    <span className="font-black text-sm">- MYR {pointsDiscount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center bg-accent/10 p-3 rounded-xl">
                   <span className="font-bold">Total Amount</span>
-                  <span className="font-black text-accent text-lg">MYR {Math.max(0, computedTotalAmount - (newInvoice.discount || 0)).toFixed(2)}</span>
+                  <span className="font-black text-accent text-lg">MYR {finalTotalAmount.toFixed(2)}</span>
                 </div>
               </div>
             </div>
