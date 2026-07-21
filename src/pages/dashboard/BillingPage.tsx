@@ -511,7 +511,29 @@ const BillingPage = () => {
             <Button variant="outline" onClick={fetchInvoices} disabled={refreshing} className="rounded-xl font-bold bg-muted/50 border-border hover:bg-muted transition-all">
               <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} /> Refresh
             </Button>
-            <Button onClick={() => { fetchServicesAndProducts(); setInvoiceItems([]); setShowCreateDialog(true); }} className="bg-accent text-white font-black rounded-xl shadow-lg shadow-accent/20">
+            <Button onClick={() => { 
+              fetchServicesAndProducts(); 
+              setInvoiceItems([]); 
+              setNewInvoice({
+                customerId: "",
+                date: format(new Date(), "yyyy-MM-dd"),
+                time: format(new Date(), "HH:mm"),
+                paymentMethod: "Cash",
+                status: "paid",
+                notes: "",
+                guestPhone: "",
+                guestEmail: "",
+                discount: 0,
+                promoCode: "",
+                promoDiscount: 0,
+                pointsUsed: 0,
+                existingBookingId: "",
+                depositPaid: 0
+              });
+              setPromoCodeInput("");
+              setPromoCodeStatus("none");
+              setShowCreateDialog(true); 
+            }} className="bg-accent text-white font-black rounded-xl shadow-lg shadow-accent/20">
               <Plus className="w-4 h-4 mr-2" /> New Invoice
             </Button>
           </div>
@@ -839,7 +861,7 @@ const BillingPage = () => {
                             <CommandItem
                               value="walkin"
                               onSelect={() => {
-                                setNewInvoice({ ...newInvoice, customerId: "walkin", notes: "", guestPhone: "", discount: 0 });
+                                setNewInvoice({ ...newInvoice, customerId: "walkin", notes: "", guestPhone: "", discount: 0, existingBookingId: "", depositPaid: 0 });
                                 setCustomerSearchOpen(false);
                               }}
                               className="cursor-pointer"
@@ -865,7 +887,7 @@ const BillingPage = () => {
                                       description: "RM50 discount has been automatically applied to this first-time member's invoice.",
                                     });
                                   }
-                                  setNewInvoice({ ...newInvoice, customerId: c.id, notes: c.name, guestPhone: c.phone || "", discount: appliedDiscount });
+                                  setNewInvoice({ ...newInvoice, customerId: c.id, notes: c.name, guestPhone: c.phone || "", discount: appliedDiscount, existingBookingId: "", depositPaid: 0 });
                                   setCustomerSearchOpen(false);
                                 }}
                                 className="cursor-pointer"
