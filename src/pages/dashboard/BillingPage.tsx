@@ -419,7 +419,7 @@ const BillingPage = () => {
         explicit_loyalty_discount: pointsDiscount || 0,
         booking_date: newInvoice.date,
         booking_time: newInvoice.time,
-        price_paid: computedTotalAmount,
+        price_paid: Math.max(0, computedTotalAmount - (newInvoice.discount || 0) - (newInvoice.promoDiscount || 0)),
         status: newInvoice.status === 'paid' ? 'completed' : 'confirmed',
         payment_method: newInvoice.paymentMethod,
         notes: `[GUEST: ${newInvoice.notes || 'Walk-in'} | ${newInvoice.guestPhone || ''} ] ITEMS: ${itemsPayload}`,
