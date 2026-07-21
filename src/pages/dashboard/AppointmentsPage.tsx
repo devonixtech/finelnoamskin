@@ -496,7 +496,13 @@ export default function AppointmentsPage() {
       serviceName.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    // Check if the booking matches the selected date
+    const bookingDateStr = format(new Date(booking.booking_date), 'yyyy-MM-dd');
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+    const matchesDate = bookingDateStr === selectedDateStr;
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   const weekDays = Array.from({ length: 7 }, (_, i) =>
