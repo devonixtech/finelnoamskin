@@ -310,7 +310,7 @@ const BillingPage = () => {
           customerEmail: pp?.invoice_url ? '' : (booking.customer_email || booking.user?.email || ''),
           customerPhone: customerPhone,
           discount,
-          subtotal: actualPaid || totalValue, // base subtotal for the display
+          subtotal: totalValue, // base subtotal for the display
           totalValue, // keeping track of the actual total for later calculations
           coinsUsed,
           loyaltyPointsUsed,
@@ -319,6 +319,7 @@ const BillingPage = () => {
           invoiceUrl: pp?.invoice_url || `${window.location.origin}/invoices/${booking.id}`,
           notes: booking.notes,
           staff: booking.staff_name || booking.staff?.display_name || '-',
+          couponCode: booking.coupon_code || '',
         };
       });
 
@@ -862,7 +863,9 @@ const BillingPage = () => {
                             <CommandItem
                               value="walkin"
                               onSelect={() => {
-                                setNewInvoice({ ...newInvoice, customerId: "walkin", notes: "", guestPhone: "", discount: 0, existingBookingId: "", depositPaid: 0 });
+                                setPromoCodeInput("");
+                                setPromoCodeStatus("none");
+                                setNewInvoice({ ...newInvoice, customerId: "walkin", notes: "", guestPhone: "", discount: 0, promoCode: "", promoDiscount: 0, existingBookingId: "", depositPaid: 0 });
                                 setCustomerSearchOpen(false);
                               }}
                               className="cursor-pointer"
@@ -880,15 +883,22 @@ const BillingPage = () => {
                                 key={c.id}
                                 value={`${c.name} ${c.phone || ""}`}
                                 onSelect={() => {
-                                  let appliedDiscount = 0;
+                                  let appliedPromoCode = "";
+                                  let appliedPromoDiscount = 0;
                                   if (c.is_member && c.booking_count === 0) {
-                                    appliedDiscount = 50;
+                                    appliedPromoCode = "WELCOME50";
+                                    appliedPromoDiscount = 50;
+                                    setPromoCodeInput("WELCOME50");
+                                    setPromoCodeStatus("valid");
                                     toast({
                                       title: "New Member Promo Applied!",
-                                      description: "RM50 discount has been automatically applied to this first-time member's invoice.",
+                                      description: "WELCOME50 discount has been automatically applied to this first-time member's invoice.",
                                     });
+                                  } else {
+                                    setPromoCodeInput("");
+                                    setPromoCodeStatus("none");
                                   }
-                                  setNewInvoice({ ...newInvoice, customerId: c.id, notes: c.name, guestPhone: c.phone || "", discount: appliedDiscount, existingBookingId: "", depositPaid: 0 });
+                                  setNewInvoice({ ...newInvoice, customerId: c.id, notes: c.name, guestPhone: c.phone || "", discount: 0, promoCode: appliedPromoCode, promoDiscount: appliedPromoDiscount, existingBookingId: "", depositPaid: 0 });
                                   setCustomerSearchOpen(false);
                                 }}
                                 className="cursor-pointer"
@@ -1239,30 +1249,23 @@ const BillingPage = () => {
                 <div className="w-72 space-y-3">
                   <div className="flex justify-between font-medium text-slate-500">
                     <span>Subtotal</span>
-                    <span>MYR {computedTotalAmount.toFixed(2)}</span>
+                    <span>MYR {selectedInvoice.subtotal.toFixed(2)}</span>
                   </div>
-                  {newInvoice.depositPaid > 0 && (
-                    <div className="flex justify-between font-medium text-blue-600">
-                      <span>Deposit Paid</span>
-                      <span>- MYR {newInvoice.depositPaid.toFixed(2)}</span>
-                    </div>
-                  )}
-                  {newInvoice.discount > 0 && (
-                    <div className="flex justify-between font-medium text-amber-600">
-                      <span>Member Discount</span>
-                      <span>- MYR {newInvoice.discount.toFixed(2)}</span>
-                    </div>
-                  )}
-                  {newInvoice.promoDiscount > 0 && (
+                  {selectedInvoice.discount > 0 && selectedInvoice.couponCode ? (
                     <div className="flex justify-between font-medium text-green-600">
-                      <span>Coupon ({newInvoice.promoCode})</span>
-                      <span>- MYR {newInvoice.promoDiscount.toFixed(2)}</span>
+                      <span>Coupon ({selectedInvoice.couponCode})</span>
+                      <span>- MYR {selectedInvoice.discount.toFixed(2)}</span>
                     </div>
-                  )}
-                  {pointsDiscount > 0 && (
+                  ) : selectedInvoice.discount > 0 ? (
+                    <div className="flex justify-between font-medium text-amber-600">
+                      <span>Discount</span>
+                      <span>- MYR {selectedInvoice.discount.toFixed(2)}</span>
+                    </div>
+                  ) : null}
+                  {selectedInvoice.coinValue > 0 && (
                     <div className="flex justify-between font-medium text-purple-600">
-                      <span>Points Redeemed ({newInvoice.pointsUsed} pts)</span>
-                      <span>- MYR {pointsDiscount.toFixed(2)}</span>
+                      <span>Points Redeemed ({selectedInvoice.coinsUsed + selectedInvoice.loyaltyPointsUsed} pts)</span>
+                      <span>- MYR {selectedInvoice.coinValue.toFixed(2)}</span>
                     </div>
                   )}
                   <div className="h-px bg-slate-100 my-2" />
