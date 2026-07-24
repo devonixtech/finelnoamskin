@@ -42,6 +42,26 @@ const MyBookings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const getCleanStylistNote = (rawNotes: string | null): string => {
+    if (!rawNotes) return "";
+    let cleaned = rawNotes;
+    
+    // Remove [GUEST: ... ] pattern
+    cleaned = cleaned.replace(/\[GUEST:\s*.*?\s*\]/g, '');
+    
+    // Remove ITEMS: { ... } pattern
+    cleaned = cleaned.replace(/ITEMS:\s*\{.*?\}/g, '');
+    
+    // Remove [LOYALTY_POINTS_USED: ... ] pattern
+    cleaned = cleaned.replace(/\[LOYALTY_POINTS_USED:\s*.*?\s*\]/g, '');
+    
+    // Clean up remaining whitespaces, newlines, and commas
+    cleaned = cleaned.trim();
+    cleaned = cleaned.replace(/^[\s,;\-\\n]+|[\s,;\-\\n]+$/g, '');
+    
+    return cleaned;
+  };
+
   const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'bookings' | 'orders'>(
@@ -344,11 +364,15 @@ const MyBookings = () => {
                           </div>
                         </div>
                       </div>
-                      {booking.notes && (
-                        <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 italic text-xs text-slate-500 font-medium">
-                          Note for Stylist: {booking.notes}
-                        </div>
-                      )}
+                      {(() => {
+                        const cleanNote = getCleanStylistNote(booking.notes);
+                        if (!cleanNote) return null;
+                        return (
+                          <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 italic text-xs text-slate-500 font-medium">
+                            Note for Stylist: {cleanNote}
+                          </div>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 ))}
