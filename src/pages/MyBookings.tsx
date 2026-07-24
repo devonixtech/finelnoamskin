@@ -109,6 +109,21 @@ const MyBookings = () => {
       if (activeTab === 'bookings') fetchBookings();
       else fetchOrders();
     }
+
+    // Reset scroll on tab switch
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    const scrollTargets = [
+        document.getElementById('app-routes-container'),
+        document.getElementById('mobile-main-content'),
+        document.querySelector('main'),
+        document.querySelector('.overflow-y-auto'),
+        document.querySelector('[data-scroll-container]'),
+    ];
+    scrollTargets.forEach((el) => {
+        if (el) el.scrollTop = 0;
+    });
   }, [user, authLoading, activeTab]);
 
   const cancelBooking = async (bookingId: string) => {
