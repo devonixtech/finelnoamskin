@@ -187,7 +187,7 @@ const normalizeBooking = (booking: any) => {
     return {
         ...booking,
         service_name: parsedServiceName,
-        price: servicePrice || pricePaid,
+        price: Math.max(0, servicePrice - Number(booking.discount_amount || 0) - Number(booking.coin_currency_value || 0)) || pricePaid || servicePrice,
         amount_paid: pricePaid,
         service_price: servicePrice,
         duration_minutes: booking.duration_minutes ?? service.duration_minutes ?? 0,
@@ -1090,6 +1090,11 @@ export const api = {
     toyyibpay: {
         createBill: (data: { booking_id: string; payment_type?: 'full' | 'deposit'; amount?: number }) =>
             fetchWithAuth('/toyyibpay/create-bill', {
+                method: 'POST',
+                body: JSON.stringify(data),
+            }),
+        verifyPayment: (data: { billcode: string; reference?: string }) =>
+            fetchWithAuth('/toyyibpay/verify-payment', {
                 method: 'POST',
                 body: JSON.stringify(data),
             }),

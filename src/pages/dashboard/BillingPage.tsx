@@ -302,7 +302,7 @@ const BillingPage = () => {
           customer: customerName,
           customerId: booking.user_id,
           service: booking.service_name || booking.service?.name || 'Service',
-          amount: actualPaid || totalValue, // Show what was paid, or what is due
+          amount: actualPaid || finalPayable, // Show what was paid, or what is due
           date: booking.booking_date,
           status: isDeposit ? 'deposit' : iscash ? 'cash' : isPaid ? 'paid' : 'pending',
           paymentMethod: pp?.payment_method || booking.payment_method || 'Cash',
